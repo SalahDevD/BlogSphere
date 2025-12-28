@@ -1,0 +1,38 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Créer un article{% endblock %}
+
+{% block body %}
+<div style="max-width: 800px; margin: 3rem auto; padding: 2rem; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+    <h1 style="font-size: 2rem; font-weight: 900; color: #111827; margin-bottom: 2rem;">✍️ Créer un article</h1>
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div style="padding: 1rem; background: {% if label == 'success' %}#e8f5e9{% else %}#ffebee{% endif %}; border-left: 4px solid {% if label == 'success' %}#388e3c{% else %}#d32f2f{% endif %}; border-radius: 4px; margin-bottom: 1rem; color: {% if label == 'success' %}#2e7d32{% else %}#c62828{% endif %};">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+        <div style="margin-bottom: 1.5rem;">
+            {{ form_label(form.title, 'Titre', {'label_attr': {'style': 'display: block; font-weight: 600; color: #374151; margin-bottom: 0.5rem;'}}) }}
+            {{ form_widget(form.title, {'attr': {'style': 'width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem;', 'placeholder': 'Titre...'}}) }}
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+            {{ form_label(form.content, 'Contenu', {'label_attr': {'style': 'display: block; font-weight: 600; color: #374151; margin-bottom: 0.5rem;'}}) }}
+            {{ form_widget(form.content, {'attr': {'style': 'width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px; min-height: 250px; font-size: 1rem; font-family: inherit;', 'placeholder': 'Contenu...'}}) }}
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+            {{ form_label(form.category, 'Catégorie', {'label_attr': {'style': 'display: block; font-weight: 600; color: #374151; margin-bottom: 0.5rem;'}}) }}
+            {{ form_widget(form.category, {'attr': {'style': 'width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px;'}}) }}
+        </div>
+
+        <button type="submit" style="width: 100%; padding: 0.75rem; background: linear-gradient(135deg, #FF6B35, #E85A2A); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 1rem; transition: all 0.3s; margin-bottom: 1rem;">Publier →</button>
+    {{ form_end(form) }}
+
+    <a href="{{ path('app_article_index') }}" style="display: inline-block; padding: 0.5rem 1rem; background: #e5e7eb; color: #374151; text-decoration: none; border-radius: 8px; font-weight: 600;">← Annuler</a>
+</div>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvel utilisateur{% endblock %}
+
+{% block body %}
+<h1 style="color: #8b4513; margin-bottom: 2rem;">Créer un utilisateur</h1>
+
+<div style="max-width: 600px; background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+    {{ form_start(form) }}
+        <div style="margin-bottom: 1rem;">
+            {{ form_label(form.name) }}
+            {{ form_widget(form.name, {'attr': {'style': 'width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 5px;'}}) }}
+            {{ form_errors(form.name) }}
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+            {{ form_label(form.email) }}
+            {{ form_widget(form.email, {'attr': {'style': 'width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 5px;'}}) }}
+            {{ form_errors(form.email) }}
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+            {{ form_label(form.password) }}
+            {{ form_widget(form.password, {'attr': {'style': 'width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 5px;'}}) }}
+            {{ form_errors(form.password) }}
+        </div>
+
+        <button type="submit" class="btn">Créer</button>
+        <a href="{{ path('admin_user_index') }}" style="margin-left: 1rem; color: #718096;">Annuler</a>
+    {{ form_end(form) }}
+</div>
+{% endblock %}

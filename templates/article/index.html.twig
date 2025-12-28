@@ -1,0 +1,59 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Articles - BlogSphere{% endblock %}
+
+{% block body %}
+<div style="background: #f9fafb; min-height: 100vh; padding: 4rem 0;">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 0 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem;">
+            <h1 style="font-size: 2.5rem; font-weight: 900; color: #111827;">📰 Articles</h1>
+            {% if is_granted('ROLE_USER') %}
+                <a href="{{ path('app_article_new') }}" style="padding: 0.75rem 1.5rem; background: linear-gradient(135deg, #FF6B35, #E85A2A); color: white; text-decoration: none; border-radius: 8px; font-weight: 700;">✍️ Nouveau</a>
+            {% endif %}
+        </div>
+
+        {% if articles|length > 0 %}
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 2rem;">
+            {% for article in articles %}
+                <article style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: all 0.3s; display: flex; flex-direction: column; height: 100%;">
+                    {% if article.image %}
+                        <img src="{{ asset('uploads/articles/' ~ article.image) }}" style="width: 100%; height: 200px; object-fit: cover;" alt="{{ article.title }}">
+                    {% else %}
+                        <div style="width: 100%; height: 200px; background: linear-gradient(135deg, #FF6B35, #FFE5DC); display: flex; align-items: center; justify-content: center; font-size: 4rem;">📄</div>
+                    {% endif %}
+                    
+                    <div style="padding: 1.5rem; flex: 1; display: flex; flex-direction: column;">
+                        {% if article.category %}
+                            <span style="display: inline-block; padding: 0.35rem 0.85rem; background: #FFE5DC; color: #FF6B35; border-radius: 20px; font-size: 0.85rem; font-weight: 600; margin-bottom: 1rem; width: fit-content;">{{ article.category.name }}</span>
+                        {% endif %}
+                        
+                        <h2 style="font-size: 1.25rem; font-weight: 700; color: #111827; margin-bottom: 0.75rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{{ article.title }}</h2>
+                        
+                        <p style="color: #6b5563; margin-bottom: 1.5rem; flex: 1; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 0.95rem;">{{ article.content|slice(0, 120) }}...</p>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 1rem; border-top: 1px solid #e5e7eb;">
+                            <div style="font-size: 0.85rem; color: #4b5563;">
+                                <strong>{{ article.author.name }}</strong><br>
+                                {{ article.createdAt|date('d M Y') }}
+                            </div>
+                            <a href="{{ path('app_article_show', {id: article.id}) }}" style="padding: 0.5rem 1rem; background: linear-gradient(135deg, #FF6B35, #E85A2A); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; transition: all 0.3s;">Lire →</a>
+                        </div>
+                    </div>
+                </article>
+            {% endfor %}
+            </div>
+        {% else %}
+            <div style="background: white; padding: 4rem; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                <p style="font-size: 5rem; margin-bottom: 1rem;">📭</p>
+                <h2 style="font-size: 1.75rem; font-weight: 700; color: #111827; margin-bottom: 0.5rem;">Aucun article</h2>
+                <p style="color: #4b5563; margin-bottom: 1.5rem;">Soyez le premier à partager !</p>
+                {% if is_granted('ROLE_USER') %}
+                    <a href="{{ path('app_article_new') }}" style="display: inline-block; padding: 0.75rem 1.5rem; background: linear-gradient(135deg, #FF6B35, #E85A2A); color: white; text-decoration: none; border-radius: 8px; font-weight: 700;">✍️ Créer un article</a>
+                {% else %}
+                    <a href="{{ path('app_login') }}" style="display: inline-block; padding: 0.75rem 1.5rem; background: linear-gradient(135deg, #FF6B35, #E85A2A); color: white; text-decoration: none; border-radius: 8px; font-weight: 700;">Se connecter</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

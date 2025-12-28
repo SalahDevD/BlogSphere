@@ -1,0 +1,183 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier mon profil - BlogSphere{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .edit-profile-container {
+        max-width: 700px;
+        margin: 2rem auto 4rem;
+        padding: 0 1.5rem;
+    }
+
+    .edit-profile-card {
+        background: var(--white);
+        border-radius: 20px;
+        padding: 3rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        border: 1px solid var(--gray-200);
+    }
+
+    .edit-profile-title {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 2rem;
+        color: var(--gray-900);
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        font-weight: 600;
+        color: var(--gray-700);
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.875rem 1.25rem;
+        border: 2px solid var(--gray-300);
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: var(--gray-50);
+        font-family: 'Inter', sans-serif;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--orange-primary);
+        background: var(--white);
+        box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.1);
+    }
+
+    textarea.form-control {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .btn-full {
+        flex: 1;
+    }
+
+    .char-counter {
+        font-size: 0.875rem;
+        color: var(--gray-500);
+        margin-top: 0.5rem;
+        display: block;
+    }
+
+    .alert {
+        padding: 1rem 1.25rem;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+        font-weight: 500;
+    }
+
+    .alert-success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .alert-error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="edit-profile-container">
+    <div class="edit-profile-card">
+        <h1 class="edit-profile-title">✏️ Modifier mon profil</h1>
+
+        {# Flash Messages #}
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label == 'error' ? 'error' : 'success' }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        <form method="POST">
+            <div class="form-group">
+                <label class="form-label" for="name">Nom complet <span style="color: var(--orange-primary);">*</span></label>
+                <input type="text" 
+                       id="name" 
+                       name="name" 
+                       class="form-control" 
+                       value="{{ user.name }}" 
+                       required
+                       maxlength="255">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="email">Email</label>
+                <input type="email" 
+                       id="email" 
+                       name="email" 
+                       class="form-control" 
+                       value="{{ user.email }}" 
+                       disabled 
+                       style="background: var(--gray-200); cursor: not-allowed;">
+                <small style="color: var(--gray-500); display: block; margin-top: 0.5rem;">
+                    📧 L'email ne peut pas être modifié
+                </small>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="bio">Biographie</label>
+                <textarea id="bio" 
+                          name="bio" 
+                          class="form-control" 
+                          maxlength="500"
+                          placeholder="Parlez-nous de vous...">{{ user.bio }}</textarea>
+                <span class="char-counter">
+                    <span id="charCount">{{ user.bio|length|default(0) }}</span> / 500 caractères
+                </span>
+            </div>
+
+            <div class="form-actions">
+                <a href="{{ path('user_profile_index') }}" class="btn btn-outline btn-full">
+                    ← Annuler
+                </a>
+                <button type="submit" class="btn btn-full">
+                    💾 Enregistrer
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Compteur de caractères pour la biographie
+    const bioTextarea = document.getElementById('bio');
+    const charCount = document.getElementById('charCount');
+    
+    if (bioTextarea && charCount) {
+        bioTextarea.addEventListener('input', function() {
+            charCount.textContent = this.value.length;
+            
+            // Changer la couleur si proche de la limite
+            if (this.value.length > 450) {
+                charCount.style.color = 'var(--orange-primary)';
+            } else {
+                charCount.style.color = 'var(--gray-500)';
+            }
+        });
+    }
+</script>
+{% endblock %}

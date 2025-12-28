@@ -1,0 +1,611 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Accueil - BlogSphere{% endblock %}
+
+{% block stylesheets %}
+<style>
+    :root {
+        --orange-primary: #FF6B35;
+        --orange-dark: #E85A2A;
+        --orange-light: #FFE5DC;
+        --gray-900: #111827;
+        --gray-700: #374151;
+        --gray-600: #4b5563;
+        --gray-200: #e5e7eb;
+        --gray-50: #f9fafb;
+        --white: #ffffff;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        color: var(--gray-900);
+        background: var(--gray-50);
+        line-height: 1.6;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+
+    /* ===== HERO SECTION (SIMPLE) ===== */
+    .hero-section {
+        background: linear-gradient(135deg, var(--orange-primary) 0%, var(--orange-dark) 100%);
+        color: var(--white);
+        padding: 6rem 0;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 600px;
+        height: 600px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        z-index: 0;
+    }
+
+    .hero-section .container {
+        position: relative;
+        z-index: 1;
+    }
+
+    .hero-title {
+        font-size: 3.5rem;
+        font-weight: 900;
+        margin-bottom: 1rem;
+        text-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .hero-subtitle {
+        font-size: 1.5rem;
+        margin-bottom: 2.5rem;
+        opacity: 0.95;
+    }
+
+    .btn {
+        display: inline-block;
+        padding: 1rem 2.5rem;
+        font-size: 1.1rem;
+        font-weight: 700;
+        text-decoration: none;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: none;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--orange-primary), var(--orange-dark));
+        color: var(--white);
+        box-shadow: 0 4px 14px rgba(255, 107, 53, 0.4);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(255, 107, 53, 0.5);
+    }
+
+    .btn-secondary {
+        background: var(--white);
+        color: var(--orange-primary);
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-secondary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-light {
+        background: var(--white);
+        color: var(--orange-primary);
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+    }
+
+    .btn-light:hover {
+        background: var(--orange-light);
+    }
+
+    .btn-sm {
+        padding: 0.65rem 1.5rem;
+        font-size: 0.95rem;
+    }
+
+    /* ===== CAROUSEL SECTION ===== */
+    .carousel-section {
+        padding: 5rem 0;
+        background: var(--white);
+    }
+
+    .carousel-section h2 {
+        font-size: 2.5rem;
+        font-weight: 900;
+        margin-bottom: 3rem;
+        text-align: center;
+        color: var(--gray-900);
+    }
+
+    .carousel {
+        position: relative;
+        width: 100%;
+        height: 500px;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .carousel-item {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        transition: opacity 0.6s ease-in-out;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .carousel-item.active {
+        opacity: 1;
+        z-index: 1;
+    }
+
+    .carousel-content {
+        position: relative;
+        width: 100%;
+        height: 100%;
+    }
+
+    .carousel-content img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .carousel-placeholder {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, var(--orange-light) 0%, var(--gray-200) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 6rem;
+    }
+
+    .carousel-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, transparent 100%);
+        color: var(--white);
+        padding: 3rem 2.5rem;
+    }
+
+    .carousel-overlay h3 {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+        line-height: 1.3;
+    }
+
+    .carousel-meta {
+        font-size: 1rem;
+        opacity: 0.9;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Contrôles du carousel */
+    .carousel-prev,
+    .carousel-next {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(255, 255, 255, 0.9);
+        color: var(--gray-900);
+        border: none;
+        font-size: 3rem;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .carousel-prev {
+        left: 20px;
+    }
+
+    .carousel-next {
+        right: 20px;
+    }
+
+    .carousel-prev:hover,
+    .carousel-next:hover {
+        background: var(--white);
+        transform: translateY(-50%) scale(1.1);
+    }
+
+    /* Indicateurs */
+    .carousel-indicators {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 12px;
+        z-index: 10;
+    }
+
+    .indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.5);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .indicator.active,
+    .indicator:hover {
+        background: var(--white);
+        transform: scale(1.3);
+    }
+
+    /* ===== DERNIERS ARTICLES ===== */
+    .latest-articles {
+        padding: 5rem 0;
+        background: var(--gray-50);
+    }
+
+    .latest-articles h2 {
+        font-size: 2.5rem;
+        font-weight: 900;
+        margin-bottom: 3rem;
+        text-align: center;
+        color: var(--gray-900);
+    }
+
+    .articles-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 2rem;
+    }
+
+    .article-card {
+        background: var(--white);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .article-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+    }
+
+    .article-card img {
+        width: 100%;
+        height: 220px;
+        object-fit: cover;
+    }
+
+    .article-card-placeholder {
+        width: 100%;
+        height: 220px;
+        background: linear-gradient(135deg, var(--orange-light) 0%, var(--gray-200) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 4rem;
+    }
+
+    .article-card-content {
+        padding: 1.5rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .article-card-content h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: var(--gray-900);
+        line-height: 1.3;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .article-card-content p {
+        font-size: 0.95rem;
+        color: var(--gray-600);
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+        flex: 1;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .article-card-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.85rem;
+        color: var(--gray-600);
+        margin-bottom: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--gray-200);
+    }
+
+    /* ===== CTA SECTION ===== */
+    .cta-section {
+        padding: 6rem 0;
+        background: linear-gradient(135deg, var(--orange-primary) 0%, var(--orange-dark) 100%);
+        color: var(--white);
+        text-align: center;
+    }
+
+    .cta-section h2 {
+        font-size: 2.5rem;
+        font-weight: 900;
+        margin-bottom: 1rem;
+    }
+
+    .cta-section p {
+        font-size: 1.25rem;
+        margin-bottom: 2rem;
+        opacity: 0.95;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 2.5rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+        }
+
+        .carousel {
+            height: 400px;
+        }
+
+        .carousel-overlay h3 {
+            font-size: 1.5rem;
+        }
+
+        .carousel-prev,
+        .carousel-next {
+            width: 45px;
+            height: 45px;
+            font-size: 2rem;
+        }
+
+        .articles-grid {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        .container {
+            padding: 0 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+{# ===== HERO SECTION ===== #}
+<div class="hero-section">
+    <div class="container">
+        <h1 class="hero-title">✨ Bienvenue sur BlogSphere</h1>
+        <p class="hero-subtitle">Découvrez les meilleurs articles de notre communauté</p>
+        
+        <a href="{{ path('app_article_index') }}" class="btn btn-secondary" style="margin-right: 1rem;">
+            Tous les articles
+        </a>
+        
+        {% if is_granted('ROLE_USER') %}
+            <a href="#" class="btn btn-primary">
+                Créer un article
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+{# ===== CAROUSEL DES ARTICLES POPULAIRES ===== #}
+{% if popularArticles is defined and popularArticles is not empty %}
+<section class="carousel-section">
+    <div class="container">
+        <h2>🔥 Articles les plus appréciés</h2>
+        
+        <div class="carousel">
+            {% for article in popularArticles %}
+                <div class="carousel-item {% if loop.first %}active{% endif %}">
+                    <div class="carousel-content">
+                        {% if article.image %}
+                            <img src="{{ asset('uploads/articles/' ~ article.image) }}" alt="{{ article.title }}">
+                        {% else %}
+                            <div class="carousel-placeholder">📰</div>
+                        {% endif %}
+                        
+                        <div class="carousel-overlay">
+                            <h3>{{ article.title }}</h3>
+                            <p class="carousel-meta">
+                                Par {{ article.author.name }} • 
+                                {{ article.createdAt|date('d/m/Y') }}
+                            </p>
+                            
+                            <a href="{{ path('app_article_show', {id: article.id}) }}" class="btn btn-light">
+                                Lire l'article →
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        {# Contrôles du carousel #}
+        {% if popularArticles|length > 1 %}
+            <button class="carousel-prev" onclick="prevSlide()">‹</button>
+            <button class="carousel-next" onclick="nextSlide()">›</button>
+            
+            <div class="carousel-indicators">
+                {% for i in 0..(popularArticles|length - 1) %}
+                    <span class="indicator {% if i == 0 %}active{% endif %}" onclick="goToSlide({{ i }})"></span>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endif %}
+
+{# ===== DERNIERS ARTICLES ===== #}
+{% if latestArticles is defined and latestArticles is not empty %}
+<section class="latest-articles">
+    <div class="container">
+        <h2>📝 Derniers articles</h2>
+        
+        <div class="articles-grid">
+            {% for article in latestArticles %}
+                <div class="article-card">
+                    {% if article.image %}
+                        <img src="{{ asset('uploads/articles/' ~ article.image) }}" alt="{{ article.title }}">
+                    {% else %}
+                        <div class="article-card-placeholder">📄</div>
+                    {% endif %}
+                    
+                    <div class="article-card-content">
+                        <h3>{{ article.title }}</h3>
+                        <p>{{ article.content|striptags|slice(0, 150) }}...</p>
+                        
+                        <div class="article-card-meta">
+                            <span>{{ article.author.name }}</span>
+                            <span>{{ article.createdAt|date('d/m/Y') }}</span>
+                        </div>
+                        
+                        <a href="{{ path('app_article_show', {id: article.id}) }}" class="btn btn-sm btn-primary">
+                            Lire la suite
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{# ===== CTA FINAL ===== #}
+<section class="cta-section">
+    <div class="container">
+        <h2>Prêt à partager vos idées ?</h2>
+        <p>Rejoignez notre communauté de créateurs de contenu</p>
+        
+        {% if is_granted('ROLE_USER') %}
+            <a href="#" class="btn btn-light">
+                Créer mon premier article
+            </a>
+        {% else %}
+            <a href="{{ path('app_register') }}" class="btn btn-light">
+                S'inscrire gratuitement
+            </a>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    // ===== CAROUSEL JAVASCRIPT =====
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.carousel-item');
+    const indicators = document.querySelectorAll('.indicator');
+    const totalSlides = slides.length;
+
+    if (totalSlides > 0) {
+        function showSlide(index) {
+            if (index >= totalSlides) {
+                currentSlide = 0;
+            } else if (index < 0) {
+                currentSlide = totalSlides - 1;
+            } else {
+                currentSlide = index;
+            }
+
+            slides.forEach(slide => slide.classList.remove('active'));
+            indicators.forEach(indicator => indicator.classList.remove('active'));
+
+            slides[currentSlide].classList.add('active');
+            if (indicators[currentSlide]) {
+                indicators[currentSlide].classList.add('active');
+            }
+        }
+
+        function nextSlide() {
+            showSlide(currentSlide + 1);
+        }
+
+        function prevSlide() {
+            showSlide(currentSlide - 1);
+        }
+
+        function goToSlide(index) {
+            showSlide(index);
+        }
+
+        // Auto-play
+        if (totalSlides > 1) {
+            let autoPlay = setInterval(nextSlide, 5000);
+
+            const carousel = document.querySelector('.carousel');
+            if (carousel) {
+                carousel.addEventListener('mouseenter', () => {
+                    clearInterval(autoPlay);
+                });
+
+                carousel.addEventListener('mouseleave', () => {
+                    autoPlay = setInterval(nextSlide, 5000);
+                });
+            }
+
+            // Keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft') {
+                    prevSlide();
+                } else if (e.key === 'ArrowRight') {
+                    nextSlide();
+                }
+            });
+        }
+    }
+</script>
+{% endblock %}

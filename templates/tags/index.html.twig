@@ -1,0 +1,15 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Recherche par tags{% endblock %}
+
+{% block body %}
+<h1 style="color: #8b4513; margin-bottom: 2rem;">Explorer par tags</h1>
+
+<div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 3rem;">
+    {% for tag in tags %}
+    <a href="#" style="background: #f7fafc; padding: 0.5rem 1rem; border-radius: 20px; text-decoration: none; color: #2d3748; border: 1px solid #e2e8f0;">
+        {{ tag.name }} ({{ tag.articles|length }})
+    </a>
+    {% endfor %}
+</div>
+{% endblock %}

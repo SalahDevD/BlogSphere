@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des catégories{% endblock %}
+
+{% block body %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <h1 style="color: #8b4513;">Gestion des catégories</h1>
+    <a href="{{ path('admin_category_new') }}" class="btn">Nouvelle catégorie</a>
+</div>
+
+<div style="background: white; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow: hidden;">
+    <table style="width: 100%; border-collapse: collapse;">
+        <thead style="background: #f7fafc;">
+            <tr>
+                <th style="padding: 1rem; text-align: left;">ID</th>
+                <th style="padding: 1rem; text-align: left;">Nom</th>
+                <th style="padding: 1rem; text-align: left;">Slug</th>
+                <th style="padding: 1rem; text-align: left;">Articles</th>
+                <th style="padding: 1rem; text-align: left;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for category in categories %}
+            <tr style="border-bottom: 1px solid #e2e8f0;">
+                <td style="padding: 1rem;">{{ category.id }}</td>
+                <td style="padding: 1rem;">{{ category.name }}</td>
+                <td style="padding: 1rem;">{{ category.slug }}</td>
+                <td style="padding: 1rem;">{{ category.articles|length }}</td>
+                <td style="padding: 1rem;">
+                    <form method="post" action="{{ path('admin_category_delete', {id: category.id}) }}" style="display: inline;">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ category.id) }}">
+                        <button type="submit" onclick="return confirm('Êtes-vous sûr ?')" style="background: none; border: none; color: #e53e3e; cursor: pointer;">Supprimer</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

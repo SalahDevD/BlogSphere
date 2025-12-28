@@ -1,0 +1,159 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Support - BlogSphere{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .chat-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 0 1.5rem;
+    }
+
+    .chat-header {
+        background: var(--white);
+        border-radius: 16px 16px 0 0;
+        padding: 1.5rem;
+        border-bottom: 2px solid var(--gray-200);
+    }
+
+    .chat-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--gray-900);
+    }
+
+    .chat-messages {
+        background: var(--white);
+        padding: 2rem;
+        min-height: 400px;
+        max-height: 600px;
+        overflow-y: auto;
+    }
+
+    .message {
+        margin-bottom: 1.5rem;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .message-sent {
+        align-items: flex-end;
+    }
+
+    .message-received {
+        align-items: flex-start;
+    }
+
+    .message-bubble {
+        max-width: 70%;
+        padding: 1rem 1.5rem;
+        border-radius: 16px;
+        word-wrap: break-word;
+    }
+
+    .message-sent .message-bubble {
+        background: var(--orange-primary);
+        color: white;
+    }
+
+    .message-received .message-bubble {
+        background: var(--gray-100);
+        color: var(--gray-900);
+    }
+
+    .message-meta {
+        font-size: 0.75rem;
+        color: var(--gray-500);
+        margin-top: 0.5rem;
+    }
+
+    .chat-input {
+        background: var(--white);
+        border-radius: 0 0 16px 16px;
+        padding: 1.5rem;
+        border-top: 2px solid var(--gray-200);
+    }
+
+    .chat-input form {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .chat-input textarea {
+        flex: 1;
+        padding: 1rem;
+        border: 2px solid var(--gray-300);
+        border-radius: 12px;
+        resize: none;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .chat-input textarea:focus {
+        outline: none;
+        border-color: var(--orange-primary);
+    }
+
+    .chat-input button {
+        padding: 1rem 2rem;
+        background: var(--orange-primary);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .chat-input button:hover {
+        background: #e65a2f;
+    }
+
+    .empty-chat {
+        text-align: center;
+        color: var(--gray-500);
+        padding: 3rem;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="chat-container">
+    <div class="chat-header">
+        <h1 class="chat-title">💬 Support - Chat avec les superviseurs</h1>
+        <p style="color: var(--gray-600); margin-top: 0.5rem;">Posez vos questions, nous sommes là pour vous aider !</p>
+    </div>
+
+    <div class="chat-messages" id="chatMessages">
+        {% if messages|length > 0 %}
+            {% for message in messages %}
+                <div class="message {% if message.sender == app.user %}message-sent{% else %}message-received{% endif %}">
+                    <div class="message-bubble">
+                        {{ message.content }}
+                    </div>
+                    <div class="message-meta">
+                        {{ message.sender.name }} • {{ message.createdAt|date('d/m/Y H:i') }}
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-chat">
+                👋 Bienvenue ! Commencez une conversation avec notre équipe de support.
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="chat-input">
+        <form method="POST">
+            <textarea name="message" rows="3" placeholder="Écrivez votre message..." required></textarea>
+            <button type="submit">Envoyer</button>
+        </form>
+    </div>
+</div>
+
+<script>
+// Auto-scroll vers le bas
+const chatMessages = document.getElementById('chatMessages');
+chatMessages.scrollTop = chatMessages.scrollHeight;
+</script>
+{% endblock %}

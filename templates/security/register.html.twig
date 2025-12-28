@@ -1,0 +1,406 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Inscription - BlogSphere{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .auth-container {
+        min-height: calc(100vh - 80px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .auth-container::before {
+        content: '';
+        position: absolute;
+        top: -30%;
+        left: -15%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(255, 107, 53, 0.08) 0%, transparent 70%);
+        border-radius: 50%;
+        z-index: -1;
+    }
+    
+    .orange-accent {
+        position: absolute;
+        background: var(--orange-primary);
+        border-radius: 20px;
+        opacity: 0.1;
+        z-index: -1;
+    }
+    
+    .accent-1 {
+        width: 150px;
+        height: 150px;
+        bottom: 10%;
+        left: 5%;
+        animation: float 8s ease-in-out infinite;
+    }
+    
+    .accent-2 {
+        width: 100px;
+        height: 100px;
+        top: 15%;
+        right: 10%;
+        animation: float 6s ease-in-out infinite reverse;
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+    }
+    
+    .auth-card {
+        background: var(--white);
+        border-radius: 24px;
+        padding: 3rem;
+        max-width: 520px;
+        width: 100%;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        border: 1px solid var(--gray-200);
+        animation: fadeInUp 0.6s ease;
+        position: relative;
+        z-index: 1;
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .auth-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+    
+    .auth-header h1 {
+        font-size: 2rem;
+        font-weight: 900;
+        color: var(--gray-900);
+        margin-bottom: 0.5rem;
+    }
+    
+    .auth-header p {
+        color: var(--gray-600);
+        font-size: 1rem;
+    }
+    
+    /* Messages Flash */
+    .alert {
+        padding: 1rem 1.25rem;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 0.95rem;
+        font-weight: 500;
+        animation: slideDown 0.4s ease;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+    
+    .alert-success {
+        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+        color: #065f46;
+        border: 2px solid #10b981;
+    }
+    
+    .alert-danger {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        color: #991b1b;
+        border: 2px solid #ef4444;
+    }
+    
+    .alert-warning {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        color: #92400e;
+        border: 2px solid #f59e0b;
+    }
+    
+    .alert-info {
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        color: #1e40af;
+        border: 2px solid #3b82f6;
+    }
+    
+    .alert::before {
+        font-size: 1.25rem;
+        margin-right: 0.75rem;
+    }
+    
+    .alert-success::before { content: '✓'; }
+    .alert-danger::before { content: '✕'; }
+    .alert-warning::before { content: '⚠'; }
+    .alert-info::before { content: 'ℹ'; }
+    
+    .btn-close {
+        background: transparent;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: inherit;
+        opacity: 0.6;
+        transition: opacity 0.2s;
+        padding: 0;
+        margin-left: 1rem;
+        line-height: 1;
+    }
+    
+    .btn-close:hover {
+        opacity: 1;
+    }
+    
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-label {
+        display: block;
+        font-weight: 600;
+        color: var(--gray-700);
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 0.875rem 1.25rem;
+        border: 2px solid var(--gray-200);
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: var(--gray-50);
+        font-family: 'Inter', sans-serif;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: var(--orange-primary);
+        background: var(--white);
+        box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.1);
+    }
+    
+    .form-control::placeholder {
+        color: var(--gray-400);
+    }
+    
+    .form-control.is-invalid {
+        border-color: #ef4444;
+        background: #fef2f2;
+    }
+    
+    .form-control.is-invalid:focus {
+        border-color: #dc2626;
+        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+    }
+    
+    .invalid-feedback {
+        display: block;
+        color: #dc2626;
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+        font-weight: 500;
+    }
+    
+    .btn-submit {
+        width: 100%;
+        padding: 1rem;
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        background: linear-gradient(135deg, var(--orange-primary) 0%, var(--orange-dark) 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 14px rgba(255, 107, 53, 0.25);
+    }
+    
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 107, 53, 0.35);
+    }
+    
+    .btn-submit:active {
+        transform: translateY(0);
+    }
+    
+    .auth-footer {
+        text-align: center;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--gray-200);
+    }
+    
+    .auth-footer p {
+        color: var(--gray-600);
+        font-size: 0.95rem;
+    }
+    
+    .auth-footer a {
+        color: var(--orange-primary);
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.2s;
+    }
+    
+    .auth-footer a:hover {
+        color: var(--orange-dark);
+        text-decoration: underline;
+    }
+    
+    .info-box {
+        background: var(--orange-light);
+        padding: 1rem 1.25rem;
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+        border-left: 4px solid var(--orange-primary);
+    }
+    
+    .info-box p {
+        color: var(--gray-700);
+        font-size: 0.9rem;
+        margin: 0;
+        line-height: 1.5;
+    }
+    
+    .info-box strong {
+        color: var(--orange-primary);
+        font-weight: 700;
+    }
+    
+    @media (max-width: 640px) {
+        .auth-card {
+            padding: 2rem 1.5rem;
+        }
+        
+        .auth-header h1 {
+            font-size: 1.75rem;
+        }
+        
+        .alert {
+            font-size: 0.875rem;
+            padding: 0.875rem 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="auth-container">
+    <div class="orange-accent accent-1"></div>
+    <div class="orange-accent accent-2"></div>
+    
+    <div class="auth-card">
+        <div class="auth-header">
+            <h1>Rejoignez-nous !</h1>
+            <p>Créez votre compte et commencez à partager</p>
+        </div>
+
+        {# Messages Flash #}
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }}" role="alert">
+                    <span>{{ message }}</span>
+                    <button type="button" class="btn-close" onclick="this.parentElement.remove()">×</button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        <div class="info-box">
+            <p><strong>📝 Note :</strong> Vous serez automatiquement enregistré comme rédacteur. Votre premier article nécessitera une validation par un superviseur.</p>
+        </div>
+
+        {{ form_start(registrationForm, {'attr': {'novalidate': 'novalidate'}}) }}
+            <div class="form-group">
+                <label for="registration_email" class="form-label">
+                    Email <span style="color: #ef4444;">*</span>
+                </label>
+                {{ form_widget(registrationForm.email, {
+                    'attr': {
+                        'class': 'form-control' ~ (registrationForm.email.vars.errors|length > 0 ? ' is-invalid' : ''),
+                        'placeholder': 'votreemail@exemple.com'
+                    }
+                }) }}
+                {{ form_errors(registrationForm.email) }}
+            </div>
+
+            <div class="form-group">
+                <label for="registration_name" class="form-label">
+                    Nom complet <span style="color: #ef4444;">*</span>
+                </label>
+                {{ form_widget(registrationForm.name, {
+                    'attr': {
+                        'class': 'form-control' ~ (registrationForm.name.vars.errors|length > 0 ? ' is-invalid' : ''),
+                        'placeholder': 'Jean Dupont'
+                    }
+                }) }}
+                {{ form_errors(registrationForm.name) }}
+            </div>
+
+            <div class="form-group">
+                <label for="registration_password" class="form-label">
+                    Mot de passe <span style="color: #ef4444;">*</span>
+                </label>
+                {{ form_widget(registrationForm.password, {
+                    'attr': {
+                        'class': 'form-control' ~ (registrationForm.password.vars.errors|length > 0 ? ' is-invalid' : ''),
+                        'placeholder': '••••••••'
+                    }
+                }) }}
+                {{ form_errors(registrationForm.password) }}
+                <small style="display: block; margin-top: 0.5rem; color: var(--gray-600); font-size: 0.875rem;">
+                    Minimum 8 caractères (1 majuscule, 1 minuscule, 1 chiffre)
+                </small>
+            </div>
+
+            <button type="submit" class="btn-submit">
+                Créer mon compte →
+            </button>
+        {{ form_end(registrationForm) }}
+
+        <div class="auth-footer">
+            <p>Vous avez déjà un compte ? <a href="{{ path('app_login') }}">Connectez-vous</a></p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Auto-fermeture des alertes après 5 secondes
+    document.addEventListener('DOMContentLoaded', function() {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(function(alert) {
+            setTimeout(function() {
+                alert.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                alert.style.opacity = '0';
+                alert.style.transform = 'translateY(-20px)';
+                setTimeout(function() {
+                    alert.remove();
+                }, 500);
+            }, 5000);
+        });
+    });
+</script>
+{% endblock %}

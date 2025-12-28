@@ -1,0 +1,319 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion Support - BlogSphere{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .support-supervisor-container {
+        max-width: 1200px;
+        margin: 2rem auto 4rem;
+        padding: 0 1.5rem;
+    }
+
+    .page-header {
+        margin-bottom: 2.5rem;
+    }
+
+    .page-title {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--gray-900);
+        margin-bottom: 0.5rem;
+    }
+
+    .page-subtitle {
+        color: var(--gray-600);
+        font-size: 1rem;
+    }
+
+    .conversation-card {
+        background: var(--white);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        border: 1px solid var(--gray-200);
+        transition: all 0.3s ease;
+    }
+
+    .conversation-card:hover {
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        transform: translateY(-2px);
+    }
+
+    .conversation-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--gray-100);
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .user-avatar {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, var(--orange-primary), var(--orange-dark));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: 1.25rem;
+    }
+
+    .user-name {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--gray-900);
+    }
+
+    .unread-badge {
+        background: #ef4444;
+        color: white;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        font-size: 0.875rem;
+        font-weight: 700;
+        box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+    }
+
+    .messages-container {
+        max-height: 450px;
+        overflow-y: auto;
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        background: var(--gray-50);
+        border-radius: 12px;
+    }
+
+    .messages-container::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .messages-container::-webkit-scrollbar-track {
+        background: var(--gray-200);
+        border-radius: 10px;
+    }
+
+    .messages-container::-webkit-scrollbar-thumb {
+        background: var(--gray-400);
+        border-radius: 10px;
+    }
+
+    .messages-container::-webkit-scrollbar-thumb:hover {
+        background: var(--gray-500);
+    }
+
+    .message-item {
+        margin-bottom: 1rem;
+        padding: 1rem 1.25rem;
+        border-radius: 12px;
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .message-from-user {
+        background: var(--white);
+        border-left: 4px solid var(--orange-primary);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .message-from-supervisor {
+        background: #e0f2fe;
+        border-left: 4px solid #0284c7;
+        box-shadow: 0 1px 3px rgba(2, 132, 199, 0.1);
+    }
+
+    .message-sender {
+        font-weight: 700;
+        color: var(--gray-900);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .message-content {
+        color: var(--gray-700);
+        line-height: 1.6;
+        margin-bottom: 0.5rem;
+    }
+
+    .message-time {
+        font-size: 0.8rem;
+        color: var(--gray-500);
+        font-weight: 500;
+    }
+
+    .reply-form {
+        background: var(--white);
+        border: 2px solid var(--gray-200);
+        border-radius: 12px;
+        padding: 1.5rem;
+    }
+
+    .reply-form textarea {
+        width: 100%;
+        padding: 1rem;
+        border: 2px solid var(--gray-300);
+        border-radius: 10px;
+        resize: vertical;
+        min-height: 100px;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.95rem;
+        transition: border-color 0.3s ease;
+    }
+
+    .reply-form textarea:focus {
+        outline: none;
+        border-color: var(--orange-primary);
+        box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+    }
+
+    .reply-form button {
+        margin-top: 1rem;
+        padding: 0.875rem 2rem;
+        background: var(--orange-primary);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(255, 107, 53, 0.25);
+    }
+
+    .reply-form button:hover {
+        background: var(--orange-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 107, 53, 0.35);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--gray-500);
+        background: var(--white);
+        border-radius: 16px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .empty-state-text {
+        font-size: 1.125rem;
+        font-weight: 500;
+    }
+
+    @media (max-width: 768px) {
+        .conversation-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .messages-container {
+            max-height: 300px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="support-supervisor-container">
+    <div class="page-header">
+        <h1 class="page-title">💬 Gestion du Support</h1>
+        <p class="page-subtitle">Gérez toutes les conversations avec les utilisateurs</p>
+    </div>
+
+    {% if conversations|length > 0 %}
+        {% for conversation in conversations %}
+            <div class="conversation-card">
+                <div class="conversation-header">
+                    <div class="user-info">
+                        <div class="user-avatar">
+                            {{ conversation.user.name|first|upper }}
+                        </div>
+                        <span class="user-name">{{ conversation.user.name }}</span>
+                    </div>
+                    {% if conversation.unread > 0 %}
+                        <span class="unread-badge">
+                            🔔 {{ conversation.unread }} nouveau{% if conversation.unread > 1 %}x{% endif %}
+                        </span>
+                    {% endif %}
+                </div>
+
+                <div class="messages-container">
+                    {% for message in conversation.messages %}
+                        <div class="message-item {% if message.sender == conversation.user %}message-from-user{% else %}message-from-supervisor{% endif %}">
+                            <div class="message-sender">
+                                {% if message.sender == conversation.user %}
+                                    👤 {{ message.sender.name }}
+                                {% else %}
+                                    🛡️ {{ message.sender.name }} (Superviseur)
+                                {% endif %}
+                            </div>
+                            <div class="message-content">
+                                {{ message.content }}
+                            </div>
+                            <div class="message-time">
+                                📅 {{ message.createdAt|date('d/m/Y H:i') }}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="reply-form">
+                    <form method="POST" action="{{ path('support_supervisor_reply', {userId: conversation.user.id}) }}">
+                        <textarea name="message" placeholder="Tapez votre réponse ici..." required></textarea>
+                        <button type="submit">📤 Envoyer la réponse</button>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">💬</div>
+            <div class="empty-state-text">
+                Aucune conversation de support pour le moment.
+            </div>
+            <p style="margin-top: 1rem; color: var(--gray-400);">
+                Les utilisateurs pourront vous contacter via le bouton de support.
+            </p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

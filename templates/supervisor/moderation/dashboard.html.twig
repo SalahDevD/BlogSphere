@@ -1,0 +1,290 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard Superviseur - Modération{% endblock %}
+
+{% block body %}
+<div class="container my-5">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>🛡️ Dashboard Superviseur</h1>
+        <a href="{{ path('app_home') }}" class="btn btn-outline-secondary">
+            🏠 Retour à l'accueil
+        </a>
+    </div>
+
+    <!-- Flash Messages -->
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <!-- Statistiques Cards -->
+    <div class="row mb-5">
+        <div class="col-md-6 mb-3">
+            <div class="card border-warning">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title text-warning mb-0">📝 Articles en attente</h5>
+                            <p class="text-muted small mb-0">Nécessitent votre validation</p>
+                        </div>
+                        <h2 class="display-4 mb-0">{{ pendingArticles|length }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="card border-danger">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title text-danger mb-0">🚩 Signalements en attente</h5>
+                            <p class="text-muted small mb-0">Contenus signalés par les utilisateurs</p>
+                        </div>
+                        <h2 class="display-4 mb-0">{{ pendingReports|length }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section Articles en attente -->
+    <div class="card mb-5 shadow-sm">
+        <div class="card-header bg-warning text-white">
+            <h2 class="h4 mb-0">📝 Articles en attente de validation</h2>
+        </div>
+        <div class="card-body">
+            {% if pendingArticles is empty %}
+                <div class="alert alert-info mb-0">
+                    <i class="bi bi-info-circle"></i> Aucun article en attente de validation.
+                </div>
+            {% else %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 5%">#</th>
+                                <th style="width: 40%">Titre</th>
+                                <th style="width: 20%">Auteur</th>
+                                <th style="width: 15%">Date</th>
+                                <th style="width: 20%" class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for article in pendingArticles %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td>
+                                    <a href="{{ path('app_article_show', {id: article.id}) }}" 
+                                       class="text-decoration-none fw-bold" 
+                                       target="_blank"
+                                       title="Voir l'article">
+                                        {{ article.title }}
+                                    </a>
+                                    <br>
+                                    <small class="text-muted">
+                                        {{ article.content|slice(0, 100) }}...
+                                    </small>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-circle me-2">
+                                            {{ article.author.name|slice(0, 2)|upper }}
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold">{{ article.author.name }}</div>
+                                            <small class="text-muted">{{ article.author.email }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <small>{{ article.createdAt|date('d/m/Y') }}</small><br>
+                                    <small class="text-muted">{{ article.createdAt|date('H:i') }}</small>
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group" role="group">
+                                        <form method="post" 
+                                              action="{{ path('supervisor_moderation_validate_article', {id: article.id}) }}" 
+                                              class="d-inline">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('validate' ~ article.id) }}">
+                                            <button type="submit" 
+                                                    class="btn btn-success btn-sm" 
+                                                    onclick="return confirm('✅ Valider et publier cet article ?')"
+                                                    title="Valider">
+                                                ✅ Valider
+                                            </button>
+                                        </form>
+                                        
+                                        <form method="post" 
+                                              action="{{ path('supervisor_moderation_reject_article', {id: article.id}) }}" 
+                                              class="d-inline">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('reject' ~ article.id) }}">
+                                            <button type="submit" 
+                                                    class="btn btn-danger btn-sm" 
+                                                    onclick="return confirm('❌ Rejeter cet article ?')"
+                                                    title="Rejeter">
+                                                ❌ Rejeter
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Section Signalements -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-danger text-white">
+            <h2 class="h4 mb-0">🚩 Signalements en attente de traitement</h2>
+        </div>
+        <div class="card-body">
+            {% if pendingReports is empty %}
+                <div class="alert alert-info mb-0">
+                    <i class="bi bi-info-circle"></i> Aucun signalement en attente.
+                </div>
+            {% else %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 5%">#</th>
+                                <th style="width: 15%">Type</th>
+                                <th style="width: 30%">Contenu</th>
+                                <th style="width: 20%">Raison</th>
+                                <th style="width: 15%">Signalé par</th>
+                                <th style="width: 15%" class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for report in pendingReports %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td>
+                                    {% if report.article %}
+                                        <span class="badge bg-primary">📄 Article</span>
+                                    {% elseif report.comment %}
+                                        <span class="badge bg-info">💬 Commentaire</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if report.article %}
+                                        <a href="{{ path('app_article_show', {id: report.article.id}) }}" 
+                                           class="text-decoration-none fw-bold" 
+                                           target="_blank">
+                                            {{ report.article.title }}
+                                        </a>
+                                        <br>
+                                        <small class="text-muted">Par {{ report.article.author.name }}</small>
+                                    {% elseif report.comment %}
+                                        <div class="text-muted small">
+                                            {{ report.comment.content|slice(0, 100) }}...
+                                        </div>
+                                        <small class="text-muted">Par {{ report.comment.author.name }}</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-warning text-dark">
+                                        {{ report.reason }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div>{{ report.reporter.name }}</div>
+                                    <small class="text-muted">{{ report.createdAt|date('d/m/Y H:i') }}</small>
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group-vertical btn-group-sm" role="group">
+                                        <form method="post" 
+                                              action="{{ path('supervisor_moderation_approve_report', {id: report.id}) }}" 
+                                              class="mb-1">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('approve_report' ~ report.id) }}">
+                                            <button type="submit" 
+                                                    class="btn btn-danger btn-sm w-100" 
+                                                    onclick="return confirm('🗑️ Supprimer définitivement ce contenu signalé ?')"
+                                                    title="Supprimer le contenu">
+                                                🗑️ Supprimer
+                                            </button>
+                                        </form>
+                                        
+                                        <form method="post" 
+                                              action="{{ path('supervisor_moderation_reject_report', {id: report.id}) }}">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('reject_report' ~ report.id) }}">
+                                            <button type="submit" 
+                                                    class="btn btn-secondary btn-sm w-100" 
+                                                    onclick="return confirm('↩️ Rejeter ce signalement et conserver le contenu ?')"
+                                                    title="Rejeter le signalement">
+                                                ↩️ Conserver
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Navigation rapide -->
+    <div class="mt-5 text-center">
+        <a href="{{ path('app_article_index') }}" class="btn btn-outline-primary">
+            📰 Voir tous les articles
+        </a>
+        <a href="{{ path('supervisor_moderation_reports') }}" class="btn btn-outline-info">
+            📊 API Signalements (JSON)
+        </a>
+        <a href="{{ path('supervisor_moderation_pending_articles') }}" class="btn btn-outline-warning">
+            📊 API Articles (JSON)
+        </a>
+    </div>
+</div>
+
+<style>
+    .avatar-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #FF6B35, #E85A2A);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 14px;
+    }
+    
+    .card {
+        border-radius: 12px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .btn-group .btn,
+    .btn-group-vertical .btn {
+        margin: 0;
+    }
+    
+    .display-4 {
+        font-weight: 700;
+        color: #333;
+    }
+</style>
+{% endblock %}

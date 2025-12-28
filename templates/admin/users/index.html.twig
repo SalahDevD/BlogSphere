@@ -1,0 +1,56 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des utilisateurs{% endblock %}
+
+{% block body %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <h1 style="color: #8b4513;">Gestion des utilisateurs</h1>
+    <a href="{{ path('admin_user_new') }}" class="btn">Nouvel utilisateur</a>
+</div>
+
+<div style="background: white; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow: hidden;">
+    <table style="width: 100%; border-collapse: collapse;">
+        <thead style="background: #f7fafc;">
+            <tr>
+                <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e2e8f0;">ID</th>
+                <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e2e8f0;">Nom</th>
+                <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e2e8f0;">Email</th>
+                <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e2e8f0;">Rôles</th>
+                <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e2e8f0;">Statut</th>
+                <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e2e8f0;">Validé</th>
+                <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e2e8f0;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr style="border-bottom: 1px solid #e2e8f0;">
+                <td style="padding: 1rem;">{{ user.id }}</td>
+                <td style="padding: 1rem;">{{ user.name }}</td>
+                <td style="padding: 1rem;">{{ user.email }}</td>
+                <td style="padding: 1rem;">{{ user.roles|join(', ') }}</td>
+                <td style="padding: 1rem;">
+                    <span style="padding: 0.25rem 0.75rem; border-radius: 15px; background: {{ user.isActive ? '#d4edda' : '#f8d7da' }}; color: {{ user.isActive ? '#155724' : '#721c24' }};">
+                        {{ user.isActive ? 'Actif' : 'Inactif' }}
+                    </span>
+                </td>
+                <td style="padding: 1rem;">
+                    <span style="padding: 0.25rem 0.75rem; border-radius: 15px; background: {{ user.isValidated ? '#d4edda' : '#fff3cd' }}; color: {{ user.isValidated ? '#155724' : '#856404' }};">
+                        {{ user.isValidated ? 'Oui' : 'Non' }}
+                    </span>
+                </td>
+                <td style="padding: 1rem;">
+                    <a href="{{ path('admin_user_edit', {id: user.id}) }}" style="color: #ff6b35; margin-right: 1rem;">Modifier</a>
+                    <a href="{{ path('admin_user_toggle', {id: user.id}) }}" style="color: #4299e1; margin-right: 1rem;">
+                        {{ user.isActive ? 'Désactiver' : 'Activer' }}
+                    </a>
+                    <form method="post" action="{{ path('admin_user_delete', {id: user.id}) }}" style="display: inline;">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
+                        <button type="submit" onclick="return confirm('Êtes-vous sûr ?')" style="background: none; border: none; color: #e53e3e; cursor: pointer;">Supprimer</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

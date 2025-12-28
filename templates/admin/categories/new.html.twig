@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvelle catégorie{% endblock %}
+
+{% block body %}
+<h1 style="color: #8b4513; margin-bottom: 2rem;">Créer une catégorie</h1>
+
+<div style="max-width: 600px; background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+    <form method="post">
+        <div style="margin-bottom: 1rem;">
+            <label for="name">Nom de la catégorie</label>
+            <input type="text" id="name" name="name" required 
+                   style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 5px;">
+        </div>
+
+        <button type="submit" class="btn">Créer</button>
+        <a href="{{ path('admin_category_index') }}" style="margin-left: 1rem; color: #718096;">Annuler</a>
+    </form>
+</div>
+{% endblock %}
