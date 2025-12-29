@@ -7,6 +7,18 @@
     <div style="max-width: 900px; margin: 0 auto; padding: 0 2rem;">
         <a href="{{ path('app_article_index') }}" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: #e5e7eb; color: #374151; text-decoration: none; border-radius: 8px; font-weight: 600; margin-bottom: 2rem; transition: all 0.3s;">← Tous les articles</a>
 
+        {# Flash messages #}
+        {% for message in app.flashes('success') %}
+            <div style="background: #d1fae5; padding: 1rem; border-radius: 8px; border-left: 4px solid #10b981; color: #065f46; margin-bottom: 1.5rem; font-weight: 600;">
+                {{ message }}
+            </div>
+        {% endfor %}
+        {% for message in app.flashes('error') %}
+            <div style="background: #fee2e2; padding: 1rem; border-radius: 8px; border-left: 4px solid #ef4444; color: #991b1b; margin-bottom: 1.5rem; font-weight: 600;">
+                {{ message }}
+            </div>
+        {% endfor %}
+
         <div style="background: white; padding: 2rem; border-radius: 12px; margin-bottom: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
             {% if article.category %}
                 <span style="display: inline-block; padding: 0.35rem 0.85rem; background: #FFE5DC; color: #FF6B35; border-radius: 20px; font-size: 0.85rem; font-weight: 600; margin-bottom: 1rem;">{{ article.category.name }}</span>
@@ -44,40 +56,93 @@
             {{ article.content|nl2br|raw }}
         </div>
 
+        {# ============= SECTION RÉACTIONS ============= #}
         <div style="background: white; padding: 2rem; border-radius: 12px; margin-bottom: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
             <h3 style="font-size: 1.25rem; font-weight: 700; color: #111827; margin-bottom: 1.5rem;">Votre avis</h3>
             
             {% if is_granted('ROLE_USER') %}
-                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                    {# 👍 Like article #}
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
+                    {# 👍 Bouton Like #}
                     <form method="POST"
-                          action="{{ path('reaction_article_like', { articleId: article.id }) }}"
+                          action="{{ path('app_reaction_article_like', { articleId: article.id }) }}"
                           style="display: inline;">
                         <button type="submit"
-                                style="padding: 0.75rem 1.5rem; background: white; border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s; color: #374151;">
+                                style="
+                                    padding: 0.75rem 1.5rem;
+                                    border-radius: 8px;
+                                    cursor: pointer;
+                                    font-weight: 600;
+                                    transition: all 0.3s;
+                                    font-size: 1rem;
+                                    {% if userReaction and userReaction.isLike %}
+                                        background: #10b981;
+                                        border: 2px solid #10b981;
+                                        color: white;
+                                    {% else %}
+                                        background: white;
+                                        border: 2px solid #e5e7eb;
+                                        color: #374151;
+                                    {% endif %}
+                                ">
                             👍 J'aime
+                            <span style="
+                                margin-left: 0.5rem;
+                                padding: 0.25rem 0.5rem;
+                                border-radius: 4px;
+                                background: rgba(0,0,0,0.1);
+                                font-size: 0.9rem;
+                            ">
+                                {{ likesCount }}
+                            </span>
                         </button>
                     </form>
 
-                    {# 👎 Dislike article (optionnel) #}
-                    {#
+                    {# 👎 Bouton Dislike #}
                     <form method="POST"
-                          action="{{ path('reaction_article_dislike', { articleId: article.id }) }}"
+                          action="{{ path('app_reaction_article_dislike', { articleId: article.id }) }}"
                           style="display: inline;">
                         <button type="submit"
-                                style="padding: 0.75rem 1.5rem; background: white; border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s; color: #374151;">
+                                style="
+                                    padding: 0.75rem 1.5rem;
+                                    border-radius: 8px;
+                                    cursor: pointer;
+                                    font-weight: 600;
+                                    transition: all 0.3s;
+                                    font-size: 1rem;
+                                    {% if userReaction and not userReaction.isLike %}
+                                        background: #ef4444;
+                                        border: 2px solid #ef4444;
+                                        color: white;
+                                    {% else %}
+                                        background: white;
+                                        border: 2px solid #e5e7eb;
+                                        color: #374151;
+                                    {% endif %}
+                                ">
                             👎 Je n'aime pas
+                            <span style="
+                                margin-left: 0.5rem;
+                                padding: 0.25rem 0.5rem;
+                                border-radius: 4px;
+                                background: rgba(0,0,0,0.1);
+                                font-size: 0.9rem;
+                            ">
+                                {{ dislikesCount }}
+                            </span>
                         </button>
                     </form>
-                    #}
                 </div>
             {% else %}
                 <p style="background: #FFE5DC; padding: 1rem; border-radius: 8px; border-left: 4px solid #FF6B35; color: #111827;">
                     👤 <a href="{{ path('app_login') }}" style="color: #FF6B35; font-weight: 600; text-decoration: none;">Connectez-vous</a> pour réagir
                 </p>
+                <p style="margin-top: 1rem; color: #6b5563; font-size: 0.95rem;">
+                    👍 <strong>{{ likesCount }}</strong> likes · 👎 <strong>{{ dislikesCount }}</strong> dislikes
+                </p>
             {% endif %}
         </div>
 
+        {# ============= SECTION COMMENTAIRES ============= #}
         <div style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
             <h3 style="font-size: 1.25rem; font-weight: 700; color: #111827; margin-bottom: 1.5rem;">💬 Commentaires ({{ article.comments|length }})</h3>
             

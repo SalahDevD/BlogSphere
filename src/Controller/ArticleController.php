@@ -5,20 +5,22 @@ namespace App\Controller;
 use App\Entity\Article;
 use App\Form\ArticleType;
 use App\Repository\ArticleRepository;
+use App\Repository\ReactionRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
 #[Route('/articles', name: 'app_article')]
 class ArticleController extends AbstractController
 {
-    public function __construct(private SluggerInterface $slugger)
-    {
+    public function __construct(
+        private SluggerInterface $slugger
+    ) {
     }
 
     #[Route('', name: '_index', methods: ['GET'])]
@@ -62,12 +64,10 @@ class ArticleController extends AbstractController
             $article->setAuthor($this->getUser());
             $article->setValidationStatus('pending');
             $article->setCreatedAt(new \DateTime());
-
             $em->persist($article);
             $em->flush();
 
             $this->addFlash('info', '📨 Votre article a été soumis et est en attente de validation.');
-
             return $this->redirectToRoute('app_article_index');
         }
 
@@ -77,24 +77,39 @@ class ArticleController extends AbstractController
     }
 
     #[Route('/{id}', name: '_show', methods: ['GET'], priority: -1)]
-    public function show(Article $article): Response
+    public function show(Article $article, ReactionRepository $reactionRepo): Response
     {
         if ($article->getValidationStatus() !== 'approved') {
             $user = $this->getUser();
-
             if (
                 !$user ||
                 ($article->getAuthor() !== $user &&
-                    !$this->isGranted('ROLE_SUPERVISOR') &&
-                    !$this->isGranted('ROLE_ADMIN'))
+                 !$this->isGranted('ROLE_SUPERVISOR') &&
+                 !$this->isGranted('ROLE_ADMIN'))
             ) {
                 $this->addFlash('danger', '❌ Cet article n\'est pas encore publié.');
                 return $this->redirectToRoute('app_article_index');
             }
         }
 
+        // Compter les likes et dislikes
+        $likesCount = $reactionRepo->countLikesForArticle($article->getId());
+        $dislikesCount = $reactionRepo->countDislikesForArticle($article->getId());
+
+        // Récupérer la réaction de l'utilisateur connecté
+        $userReaction = null;
+        if ($this->getUser()) {
+            $userReaction = $reactionRepo->findUserReactionForArticle(
+                $this->getUser()->getId(),
+                $article->getId()
+            );
+        }
+
         return $this->render('article/show.html.twig', [
-            'article' => $article,
+            'article'       => $article,
+            'likesCount'    => $likesCount,
+            'dislikesCount' => $dislikesCount,
+            'userReaction'  => $userReaction,
         ]);
     }
 
@@ -115,21 +130,17 @@ class ArticleController extends AbstractController
 
             if ($imageFile) {
                 $newFilename = 'article_' . uniqid() . '.' . $imageFile->guessExtension();
-
                 $imageFile->move(
                     $this->getParameter('articles_images_directory'),
                     $newFilename
                 );
-
                 $article->setImage($newFilename);
             }
 
             $article->setUpdatedAt(new \DateTime());
-
             $em->flush();
 
             $this->addFlash('success', '✅ Article modifié avec succès.');
-
             return $this->redirectToRoute('app_article_show', [
                 'id' => $article->getId(),
             ]);
@@ -137,7 +148,7 @@ class ArticleController extends AbstractController
 
         return $this->render('article/edit.html.twig', [
             'article' => $article,
-            'form' => $form,
+            'form'    => $form,
         ]);
     }
 

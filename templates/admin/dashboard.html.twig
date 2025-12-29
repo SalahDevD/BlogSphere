@@ -21,7 +21,6 @@
         position: relative;
         overflow: hidden;
     }
-    
     .admin-header::before {
         content: '';
         position: absolute;
@@ -32,7 +31,6 @@
         background: rgba(255, 255, 255, 0.1);
         border-radius: 50%;
     }
-    
     .admin-header h1 {
         font-size: 2rem;
         font-weight: 900;
@@ -40,40 +38,34 @@
         position: relative;
         z-index: 1;
     }
-    
     .admin-header p {
         font-size: 1rem;
         opacity: 0.95;
         position: relative;
         z-index: 1;
     }
-    
     .admin-nav {
         display: flex;
         gap: 1rem;
         position: relative;
         z-index: 1;
     }
-    
     .admin-nav .btn {
         background: rgba(255, 255, 255, 0.2);
         backdrop-filter: blur(10px);
         border: 1px solid rgba(255, 255, 255, 0.3);
     }
-    
     .admin-nav .btn:hover {
         background: var(--white);
         color: var(--orange-primary);
     }
-    
-    /* Stats Grid */
+
     .stats-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
         gap: 1.5rem;
         margin-bottom: 2.5rem;
     }
-    
     .stat-card {
         background: var(--white);
         padding: 1.75rem;
@@ -85,7 +77,6 @@
         position: relative;
         overflow: hidden;
     }
-    
     .stat-card::before {
         content: '';
         position: absolute;
@@ -97,17 +88,14 @@
         transform: scaleY(0);
         transition: transform 0.3s ease;
     }
-    
     .stat-card:hover::before {
         transform: scaleY(1);
     }
-    
     .stat-card:hover {
         transform: translateY(-4px);
         box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
         border-color: var(--orange-primary);
     }
-    
     .stat-icon {
         width: 50px;
         height: 50px;
@@ -119,7 +107,6 @@
         font-size: 1.5rem;
         margin-bottom: 1rem;
     }
-    
     .stat-value {
         font-size: 2.2rem;
         font-weight: 900;
@@ -127,13 +114,12 @@
         margin-bottom: 0.5rem;
         line-height: 1;
     }
-    
     .stat-label {
         color: var(--gray-600);
         font-weight: 600;
         font-size: 0.9rem;
     }
-    
+
     .info-section {
         background: var(--white);
         padding: 2rem;
@@ -143,7 +129,6 @@
         margin-bottom: 1.5rem;
         animation: fadeInUp 1s ease;
     }
-    
     .section-title {
         font-size: 1.5rem;
         font-weight: 800;
@@ -153,13 +138,11 @@
         align-items: center;
         gap: 0.75rem;
     }
-    
     .info-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
         gap: 1.25rem;
     }
-    
     .info-item {
         padding: 1.25rem;
         background: var(--gray-50);
@@ -167,12 +150,10 @@
         border: 1px solid var(--gray-200);
         transition: all 0.3s ease;
     }
-    
     .info-item:hover {
         border-color: var(--orange-primary);
         background: var(--white);
     }
-    
     .info-item strong {
         color: var(--gray-900);
         font-weight: 700;
@@ -180,25 +161,22 @@
         display: block;
         margin-bottom: 0.5rem;
     }
-    
     .info-item p {
         color: var(--gray-600);
         margin: 0;
         font-size: 1.1rem;
         font-weight: 700;
     }
-    
     .info-item a {
         color: var(--orange-primary);
         text-decoration: none;
         transition: color 0.3s;
     }
-    
     .info-item a:hover {
         color: var(--orange-dark);
         text-decoration: underline;
     }
-    
+
     @media (max-width: 768px) {
         .admin-header {
             flex-direction: column;
@@ -206,43 +184,35 @@
             gap: 1.25rem;
             padding: 1.5rem;
         }
-        
         .admin-header h1 {
             font-size: 1.75rem;
         }
-        
         .stats-grid {
             grid-template-columns: 1fr;
             gap: 1rem;
         }
-        
         .info-section {
             padding: 1.5rem;
         }
-        
         .section-title {
             font-size: 1.3rem;
         }
-        
         .info-grid {
             grid-template-columns: 1fr;
             gap: 1rem;
         }
     }
-    
+
     @media (max-width: 480px) {
         .admin-container {
             padding: 1rem 0 2rem;
         }
-        
         .admin-header {
             margin-bottom: 1.5rem;
         }
-        
         .stat-card {
             padding: 1.5rem;
         }
-        
         .stat-value {
             font-size: 2rem;
         }
@@ -262,7 +232,6 @@
         </div>
     </div>
 
-    <!-- Stats Grid -->
     <div class="stats-grid">
         <div class="stat-card">
             <div class="stat-icon">📝</div>
@@ -291,7 +260,6 @@
         </div>
     </div>
 
-    <!-- Quick Actions -->
     <div class="info-section">
         <h2 class="section-title">⚡ Actions rapides</h2>
         <div class="info-grid">
@@ -301,20 +269,19 @@
             </div>
             <div class="info-item">
                 <strong>Tous les articles</strong>
-                <p><a href="{{ path('article_index') }}">Parcourir les articles →</a></p>
+                <p><a href="{{ path('app_article_index') }}">Parcourir les articles →</a></p>
             </div>
             <div class="info-item">
                 <strong>Modération</strong>
-                <p><a href="{{ path('supervisor_dashboard') }}">Aller à la modération →</a></p>
+                <p><a href="{{ path('supervisor_moderation_dashboard') }}">Aller à la modération →</a></p>
             </div>
             <div class="info-item">
                 <strong>Créer un article</strong>
-                <p><a href="{{ path('article_new') }}">Nouvel article →</a></p>
+                <p><a href="{{ path('app_article_new') }}">Nouvel article →</a></p>
             </div>
         </div>
     </div>
 
-    <!-- System Info -->
     <div class="info-section">
         <h2 class="section-title">ℹ️ Informations système</h2>
         <div class="info-grid">

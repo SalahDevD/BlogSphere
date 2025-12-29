@@ -25,17 +25,8 @@
             --gray-50: #f9fafb;
             --white: #ffffff;
         }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        html {
-            scroll-behavior: smooth;
-        }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--gray-50);
@@ -46,11 +37,8 @@
             flex-direction: column;
             min-height: 100vh;
         }
+        main { flex: 1; }
 
-        main {
-            flex: 1;
-        }
-        
         /* Navbar */
         .navbar {
             background: var(--white);
@@ -62,18 +50,10 @@
             background: rgba(255, 255, 255, 0.95);
             animation: slideDown 0.5s ease;
         }
-        
         @keyframes slideDown {
-            from {
-                transform: translateY(-100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
-        
         .navbar-container {
             max-width: 1280px;
             margin: 0 auto;
@@ -82,7 +62,6 @@
             justify-content: space-between;
             align-items: center;
         }
-        
         .logo {
             font-size: 1.5rem;
             font-weight: 900;
@@ -91,17 +70,12 @@
             letter-spacing: -0.5px;
             transition: color 0.3s;
         }
-        
-        .logo:hover {
-            color: var(--orange-primary);
-        }
-        
+        .logo:hover { color: var(--orange-primary); }
         .nav-links {
             display: flex;
             gap: 2rem;
             align-items: center;
         }
-        
         .nav-links a {
             color: var(--gray-600);
             text-decoration: none;
@@ -110,11 +84,7 @@
             transition: color 0.2s;
             position: relative;
         }
-        
-        .nav-links a:hover {
-            color: var(--orange-primary);
-        }
-        
+        .nav-links a:hover { color: var(--orange-primary); }
         .nav-links a::after {
             content: '';
             position: absolute;
@@ -125,11 +95,8 @@
             background: var(--orange-primary);
             transition: width 0.3s ease;
         }
-        
-        .nav-links a:hover::after {
-            width: 100%;
-        }
-        
+        .nav-links a:hover::after { width: 100%; }
+
         /* Buttons */
         .btn {
             background: var(--orange-primary);
@@ -146,45 +113,35 @@
             box-shadow: 0 4px 14px rgba(255, 107, 53, 0.25);
             font-family: 'Inter', sans-serif;
         }
-        
         .btn:hover {
             background: var(--orange-dark);
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(255, 107, 53, 0.35);
         }
-        
-        .btn:active {
-            transform: translateY(0);
-        }
-        
+        .btn:active { transform: translateY(0); }
         .btn-outline {
             background: transparent;
             color: var(--orange-primary);
             border: 2px solid var(--orange-primary);
             box-shadow: none;
         }
-        
         .btn-outline:hover {
             background: var(--orange-primary);
             color: var(--white);
         }
-        
         .btn-secondary {
             background: var(--gray-800);
             box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
         }
-        
-        .btn-secondary:hover {
-            background: var(--gray-900);
-        }
-        
+        .btn-secondary:hover { background: var(--gray-900); }
+
         /* Container */
         .container {
             max-width: 1280px;
             margin: 0 auto;
             padding: 0 2rem;
         }
-        
+
         /* Alerts */
         .alerts {
             position: fixed;
@@ -193,7 +150,6 @@
             z-index: 2000;
             max-width: 400px;
         }
-        
         .alert {
             padding: 1rem 1.5rem;
             margin-bottom: 1rem;
@@ -202,36 +158,25 @@
             animation: slideInRight 0.4s ease;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
-        
         @keyframes slideInRight {
-            from {
-                opacity: 0;
-                transform: translateX(100px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
+            from { opacity: 0; transform: translateX(100px); }
+            to { opacity: 1; transform: translateX(0); }
         }
-        
         .alert-success {
             background: #ecfdf5;
             color: #065f46;
             border-left: 4px solid #10b981;
         }
-        
         .alert-error {
             background: #fef2f2;
             color: #991b1b;
             border-left: 4px solid #ef4444;
         }
-        
         .alert-info {
             background: #eff6ff;
             color: #1e40af;
             border-left: 4px solid #3b82f6;
         }
-
         .alert-warning {
             background: #fef3c7;
             color: #92400e;
@@ -258,12 +203,10 @@
             align-items: center;
             justify-content: center;
         }
-
         .support-chat-button:hover {
             transform: translateY(-3px) scale(1.05);
             box-shadow: 0 6px 20px rgba(255, 107, 53, 0.5);
         }
-
         .support-chat-popup {
             position: fixed;
             bottom: 100px;
@@ -279,22 +222,11 @@
             overflow: hidden;
             animation: slideUp 0.3s ease;
         }
-
         @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-
-        .support-chat-popup.active {
-            display: flex;
-        }
-
+        .support-chat-popup.active { display: flex; }
         .chat-popup-header {
             background: var(--orange-primary);
             color: white;
@@ -303,12 +235,10 @@
             justify-content: space-between;
             align-items: center;
         }
-
         .chat-popup-title {
             font-weight: 700;
             font-size: 1.125rem;
         }
-
         .chat-popup-close {
             background: none;
             border: none;
@@ -324,36 +254,25 @@
             border-radius: 50%;
             transition: background 0.2s;
         }
-
         .chat-popup-close:hover {
             background: rgba(255, 255, 255, 0.2);
         }
-
         .chat-popup-messages {
             flex: 1;
             padding: 1.5rem;
             overflow-y: auto;
             background: var(--gray-50);
         }
-
-        .chat-popup-messages::-webkit-scrollbar {
-            width: 6px;
-        }
-
+        .chat-popup-messages::-webkit-scrollbar { width: 6px; }
         .chat-popup-messages::-webkit-scrollbar-thumb {
             background: var(--gray-400);
             border-radius: 10px;
         }
-
         .chat-message {
             margin-bottom: 1rem;
             animation: fadeIn 0.3s ease;
         }
-
-        .chat-message-sent {
-            text-align: right;
-        }
-
+        .chat-message-sent { text-align: right; }
         .chat-message-bubble {
             display: inline-block;
             max-width: 75%;
@@ -361,29 +280,24 @@
             border-radius: 12px;
             word-wrap: break-word;
         }
-
         .chat-message-sent .chat-message-bubble {
             background: var(--orange-primary);
             color: white;
         }
-
         .chat-message-received .chat-message-bubble {
             background: white;
             color: var(--gray-900);
             border: 1px solid var(--gray-200);
         }
-
         .chat-popup-input {
             padding: 1rem;
             border-top: 1px solid var(--gray-200);
             background: white;
         }
-
         .chat-popup-input form {
             display: flex;
             gap: 0.5rem;
         }
-
         .chat-popup-input input {
             flex: 1;
             padding: 0.75rem;
@@ -392,12 +306,10 @@
             font-family: 'Inter', sans-serif;
             font-size: 0.95rem;
         }
-
         .chat-popup-input input:focus {
             outline: none;
             border-color: var(--orange-primary);
         }
-
         .chat-popup-input button {
             padding: 0.75rem 1.25rem;
             background: var(--orange-primary);
@@ -408,16 +320,10 @@
             font-weight: 600;
             transition: background 0.3s;
         }
+        .chat-popup-input button:hover { background: var(--orange-dark); }
 
-        .chat-popup-input button:hover {
-            background: var(--orange-dark);
-        }
-        
         /* Sections */
-        .section {
-            padding: 5rem 0;
-        }
-        
+        .section { padding: 5rem 0; }
         .section-title {
             font-size: 2.5rem;
             font-weight: 800;
@@ -425,39 +331,25 @@
             margin-bottom: 3rem;
             color: var(--gray-900);
         }
-        
+
         /* Responsive */
         @media (max-width: 768px) {
-            .navbar-container {
-                flex-wrap: wrap;
-                gap: 1rem;
-            }
-            
+            .navbar-container { flex-wrap: wrap; gap: 1rem; }
             .nav-links {
                 flex-direction: column;
                 gap: 1rem;
                 width: 100%;
             }
-            
-            .section {
-                padding: 3rem 0;
-            }
-            
-            .section-title {
-                font-size: 2rem;
-            }
-
+            .section { padding: 3rem 0; }
+            .section-title { font-size: 2rem; }
             .support-chat-popup {
                 width: calc(100% - 2rem);
                 right: 1rem;
                 left: 1rem;
             }
-
-            .container {
-                padding: 0 1rem;
-            }
+            .container { padding: 0 1rem; }
         }
-        
+
         /* Loading animation */
         .loading {
             display: inline-block;
@@ -468,27 +360,13 @@
             border-top-color: var(--white);
             animation: spin 0.8s linear infinite;
         }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
+        @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        
         @keyframes slideOutRight {
-            to {
-                opacity: 0;
-                transform: translateX(100px);
-            }
+            to { opacity: 0; transform: translateX(100px); }
         }
 
         footer {
@@ -498,36 +376,24 @@
             margin-top: 5rem;
             border-top: 1px solid var(--gray-800);
         }
-
         footer .container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 2rem;
         }
-
         footer h3 {
             color: var(--white);
             margin-bottom: 1rem;
             font-size: 1rem;
         }
-
         footer a {
             color: var(--gray-400);
             text-decoration: none;
             transition: color 0.3s;
         }
-
-        footer a:hover {
-            color: var(--orange-primary);
-        }
-
-        footer ul {
-            list-style: none;
-        }
-
-        footer ul li {
-            margin-bottom: 0.5rem;
-        }
+        footer a:hover { color: var(--orange-primary); }
+        footer ul { list-style: none; }
+        footer ul li { margin-bottom: 0.5rem; }
     </style>
     {% block stylesheets %}{% endblock %}
 </head>
@@ -540,22 +406,22 @@
                     {# Utilisateur connecté #}
                     <a href="{{ path('app_article_index') }}">📰 Articles</a>
                     <a href="{{ path('user_profile_index') }}">👤 Mon Profil</a>
-                    
-                    {# Tous les utilisateurs peuvent créer des articles #}
-                    {% if is_granted('ROLE_USER') %}
+
+                    {# Création d’articles : réservé à ROLE_EDITOR (cohérent avec security.yaml) #}
+                    {% if is_granted('ROLE_EDITOR') %}
                         <a href="{{ path('app_article_new') }}">✍️ Créer</a>
                     {% endif %}
-                    
+
                     {# Dashboard Admin #}
                     {% if is_granted('ROLE_ADMIN') %}
-                        <a href="#">⚙️ Admin</a>
+                        <a href="{{ path('admin_dashboard') }}">⚙️ Admin</a>
                     {% endif %}
-                    
+
                     {# Dashboard Superviseur #}
                     {% if is_granted('ROLE_SUPERVISOR') %}
-                        <a href="#">🔍 Supervision</a>
+                        <a href="{{ path('supervisor_moderation_dashboard') }}">🔍 Supervision</a>
                     {% endif %}
-                    
+
                     <a href="{{ path('app_logout') }}" class="btn btn-outline">Déconnexion</a>
                 {% else %}
                     {# Utilisateur non connecté #}
@@ -586,7 +452,6 @@
         {% block body %}{% endblock %}
     </main>
 
-    {# Support Chat Popup (seulement pour utilisateurs connectés) #}
     {% if app.user %}
         <button class="support-chat-button" onclick="toggleSupportChat()" title="Contacter le support">
             💬
@@ -650,7 +515,6 @@
     </footer>
 
     <script>
-        // Auto-hide alerts after 5 seconds
         document.querySelectorAll('.alert').forEach(alert => {
             setTimeout(() => {
                 alert.style.animation = 'slideOutRight 0.4s ease';
@@ -658,12 +522,10 @@
             }, 5000);
         });
 
-        // Support Chat Toggle
         function toggleSupportChat() {
             const popup = document.getElementById('supportChatPopup');
             if (popup) {
                 popup.classList.toggle('active');
-                
                 if (popup.classList.contains('active')) {
                     const input = document.getElementById('chatInput');
                     if (input) input.focus();
@@ -671,26 +533,18 @@
             }
         }
 
-        // Send Support Message
         function sendSupportMessage(event) {
             event.preventDefault();
-            
             const input = document.getElementById('chatInput');
             const message = input.value.trim();
-            
             if (message) {
                 const messagesContainer = document.getElementById('chatMessages');
-                
-                // Ajouter le message de l'utilisateur
                 const messageDiv = document.createElement('div');
                 messageDiv.className = 'chat-message chat-message-sent';
                 messageDiv.innerHTML = `<div class="chat-message-bubble">${escapeHtml(message)}</div>`;
                 messagesContainer.appendChild(messageDiv);
-                
                 input.value = '';
                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
-                
-                // Confirmation automatique après 500ms
                 setTimeout(() => {
                     const confirmDiv = document.createElement('div');
                     confirmDiv.className = 'chat-message chat-message-received';
@@ -701,14 +555,13 @@
             }
         }
 
-        // Escape HTML to prevent XSS
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
     </script>
-    
+
     {% block javascripts %}{% endblock %}
 </body>
 </html>
