@@ -1,0 +1,529 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Statistiques - Admin - BlogSphere{% endblock %}
+
+{% block stylesheets %}
+<style>
+    :root {
+        --orange-primary: #FF6B35;
+        --orange-dark: #E85A2A;
+        --gray-900: #111827;
+        --gray-700: #374151;
+        --gray-600: #4b5563;
+        --gray-200: #e5e7eb;
+        --gray-50: #f9fafb;
+        --white: #ffffff;
+    }
+
+    .stats-container {
+        background: var(--gray-50);
+        min-height: 100vh;
+        padding: 3rem 0;
+    }
+
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 3rem;
+    }
+
+    .header h1 {
+        font-size: 2.5rem;
+        font-weight: 900;
+        color: var(--gray-900);
+        margin: 0;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        background: #667eea;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+
+    .back-link:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        border-left: 4px solid var(--orange-primary);
+    }
+
+    .stat-card h3 {
+        font-size: 0.9rem;
+        color: var(--gray-600);
+        margin: 0 0 0.5rem 0;
+        text-transform: uppercase;
+        font-weight: 600;
+    }
+
+    .stat-card .value {
+        font-size: 2rem;
+        font-weight: 900;
+        color: var(--gray-900);
+        margin: 0;
+    }
+
+    .stat-card.success {
+        border-left-color: #10b981;
+    }
+
+    .stat-card.warning {
+        border-left-color: #f59e0b;
+    }
+
+    .stat-card.danger {
+        border-left-color: #ef4444;
+    }
+
+    .stat-card.info {
+        border-left-color: #3b82f6;
+    }
+
+    .charts-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .chart-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .chart-card h2 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--gray-900);
+        margin: 0 0 1.5rem 0;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--gray-200);
+    }
+
+    .chart-container {
+        position: relative;
+        height: 300px;
+        margin-bottom: 1rem;
+    }
+
+    .full-width {
+        grid-column: 1 / -1;
+    }
+
+    .data-section {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        margin-bottom: 2rem;
+    }
+
+    .data-section h2 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--gray-900);
+        margin: 0 0 1.5rem 0;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--gray-200);
+    }
+
+    .data-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+
+    .data-item {
+        padding: 1rem;
+        background: var(--gray-50);
+        border-radius: 8px;
+        border-left: 4px solid var(--orange-primary);
+    }
+
+    .data-item strong {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--gray-700);
+    }
+
+    .data-item .count {
+        font-size: 1.75rem;
+        font-weight: 900;
+        color: var(--orange-primary);
+    }
+
+    @media (max-width: 1024px) {
+        .charts-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .header {
+            flex-direction: column;
+            gap: 1rem;
+            text-align: center;
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="stats-container">
+    <div class="container">
+        <div class="header">
+            <h1>📊 Statistiques Complètes</h1>
+            <a href="{{ path('admin_dashboard') }}" class="back-link">← Retour au dashboard</a>
+        </div>
+
+        {# Cartes KPI principales #}
+        <div class="stats-grid">
+            <div class="stat-card success">
+                <h3>📄 Articles Publiés</h3>
+                <p class="value">{{ publishedArticles }}</p>
+            </div>
+            <div class="stat-card warning">
+                <h3>⏳ Articles en Attente</h3>
+                <p class="value">{{ pendingArticles }}</p>
+            </div>
+            <div class="stat-card info">
+                <h3>📝 Brouillons</h3>
+                <p class="value">{{ draftArticles }}</p>
+            </div>
+            <div class="stat-card danger">
+                <h3>❌ Articles Rejetés</h3>
+                <p class="value">{{ rejectedArticles }}</p>
+            </div>
+            <div class="stat-card">
+                <h3>💬 Commentaires</h3>
+                <p class="value">{{ totalComments }}</p>
+            </div>
+            <div class="stat-card">
+                <h3>👥 Utilisateurs</h3>
+                <p class="value">{{ totalUsers }}</p>
+            </div>
+        </div>
+
+        {# Graphiques #}
+        <div class="charts-grid">
+            <div class="chart-card full-width">
+                <h2>📈 Articles Publiés par Jour (30 derniers jours)</h2>
+                <div class="chart-container">
+                    <canvas id="articlesPerDayChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h2>📂 Articles par Catégorie</h2>
+                <div class="chart-container">
+                    <canvas id="articlesByCategoryChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h2>👍 Réactions sur les Articles</h2>
+                <div class="chart-container">
+                    <canvas id="reactionsChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h2>👥 Utilisateurs par Rôle</h2>
+                <div class="chart-container">
+                    <canvas id="usersByRoleChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h2>✍️ Articles par Auteur (Top 5)</h2>
+                <div class="chart-container">
+                    <canvas id="topAuthorsChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h2>💬 Statut des Commentaires</h2>
+                <div class="chart-container">
+                    <canvas id="commentsStatusChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        {# Sections de données détaillées #}
+        <div class="data-section">
+            <h2>📊 Résumé des Contenus</h2>
+            <div class="data-grid">
+                <div class="data-item">
+                    <strong>Total Articles</strong>
+                    <div class="count">{{ totalArticles }}</div>
+                </div>
+                <div class="data-item">
+                    <strong>Taux de Publication</strong>
+                    <div class="count">{% if totalArticles > 0 %}{{ ((publishedArticles / totalArticles) * 100)|round(1) }}%{% else %}0%{% endif %}</div>
+                </div>
+                <div class="data-item">
+                    <strong>Articles en Validation</strong>
+                    <div class="count">{{ pendingArticles }}</div>
+                </div>
+                <div class="data-item">
+                    <strong>Commentaires Validés</strong>
+                    <div class="count">{{ approvedComments }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="data-section">
+            <h2>👥 Résumé des Utilisateurs</h2>
+            <div class="data-grid">
+                <div class="data-item">
+                    <strong>Administrateurs</strong>
+                    <div class="count">{{ adminUsers }}</div>
+                </div>
+                <div class="data-item">
+                    <strong>Éditeurs</strong>
+                    <div class="count">{{ editorUsers }}</div>
+                </div>
+                <div class="data-item">
+                    <strong>Superviseurs</strong>
+                    <div class="count">{{ supervisorUsers }}</div>
+                </div>
+                <div class="data-item">
+                    <strong>Utilisateurs Réguliers</strong>
+                    <div class="count">{{ totalUsers - adminUsers - editorUsers - supervisorUsers }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Charger Chart.js depuis CDN #}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // Couleurs
+    const colors = {
+        primary: '#FF6B35',
+        success: '#10b981',
+        warning: '#f59e0b',
+        danger: '#ef4444',
+        info: '#3b82f6',
+        lightGray: '#f3f4f6'
+    };
+
+    // 1. Graphique Articles par Jour
+    const articlesPerDayCtx = document.getElementById('articlesPerDayChart').getContext('2d');
+    const articlesPerDayData = {{ articlesPerDay|json_encode|raw }};
+    const dates = Object.keys(articlesPerDayData);
+    const counts = Object.values(articlesPerDayData);
+
+    new Chart(articlesPerDayCtx, {
+        type: 'line',
+        data: {
+            labels: dates,
+            datasets: [{
+                label: 'Articles publiés',
+                data: counts,
+                borderColor: colors.primary,
+                backgroundColor: 'rgba(255, 107, 53, 0.1)',
+                borderWidth: 2,
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: colors.primary,
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    labels: { font: { size: 12 } }
+                }
+            },
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+
+    // 2. Graphique Articles par Catégorie
+    const articlesByCategoryCtx = document.getElementById('articlesByCategoryChart').getContext('2d');
+    const articlesByCategoryData = {{ articlesByCategory|json_encode|raw }};
+    const categoryLabels = Object.keys(articlesByCategoryData);
+    const categoryCounts = Object.values(articlesByCategoryData);
+
+    new Chart(articlesByCategoryCtx, {
+        type: 'doughnut',
+        data: {
+            labels: categoryLabels,
+            datasets: [{
+                data: categoryCounts,
+                backgroundColor: [
+                    '#FF6B35', '#3b82f6', '#10b981', '#f59e0b', '#ef4444',
+                    '#8b5cf6', '#ec4899', '#06b6d4', '#14b8a6', '#84cc16'
+                ],
+                borderColor: '#fff',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { font: { size: 12 }, padding: 15 }
+                }
+            }
+        }
+    });
+
+    // 3. Graphique Réactions
+    const reactionsCtx = document.getElementById('reactionsChart').getContext('2d');
+    new Chart(reactionsCtx, {
+        type: 'bar',
+        data: {
+            labels: ['J\'aime', 'Je n\'aime pas'],
+            datasets: [{
+                label: 'Nombre de réactions',
+                data: [{{ reactionStats.likes }}, {{ reactionStats.dislikes }}],
+                backgroundColor: [colors.success, colors.danger],
+                borderColor: [colors.success, colors.danger],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: true }
+            },
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+
+    // 4. Graphique Utilisateurs par Rôle
+    const usersByRoleCtx = document.getElementById('usersByRoleChart').getContext('2d');
+    new Chart(usersByRoleCtx, {
+        type: 'pie',
+        data: {
+            labels: ['Administrateurs', 'Éditeurs', 'Superviseurs', 'Utilisateurs'],
+            datasets: [{
+                data: [
+                    {{ adminUsers }},
+                    {{ editorUsers }},
+                    {{ supervisorUsers }},
+                    {{ totalUsers - adminUsers - editorUsers - supervisorUsers }}
+                ],
+                backgroundColor: ['#ef4444', '#3b82f6', '#10b981', '#f59e0b'],
+                borderColor: '#fff',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { font: { size: 12 }, padding: 15 }
+                }
+            }
+        }
+    });
+
+    // 5. Graphique Top Auteurs
+    const topAuthorsCtx = document.getElementById('topAuthorsChart').getContext('2d');
+    const topAuthorsData = {{ topAuthors|json_encode|raw }};
+    const authorNames = Object.keys(topAuthorsData);
+    const authorArticleCounts = Object.values(topAuthorsData);
+
+    new Chart(topAuthorsCtx, {
+        type: 'bar',
+        data: {
+            labels: authorNames,
+            datasets: [{
+                label: 'Articles publiés',
+                data: authorArticleCounts,
+                backgroundColor: colors.info,
+                borderColor: colors.info,
+                borderWidth: 1
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                x: { beginAtZero: true }
+            }
+        }
+    });
+
+    // 6. Graphique Statut des Commentaires
+    const commentsStatusCtx = document.getElementById('commentsStatusChart').getContext('2d');
+    new Chart(commentsStatusCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Validés', 'En attente'],
+            datasets: [{
+                data: [{{ approvedComments }}, {{ pendingComments }}],
+                backgroundColor: [colors.success, colors.warning],
+                borderColor: '#fff',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { font: { size: 12 }, padding: 15 }
+                }
+            }
+        }
+    });
+</script>
+
+{% endblock %}

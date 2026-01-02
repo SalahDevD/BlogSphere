@@ -1,5 +1,6 @@
 parameters:
     articles_images_directory: '%kernel.project_dir%/public/uploads/articles'
+    user_images_directory: '%kernel.project_dir%/public/uploads/profile'
 
 services:
     _defaults:
@@ -16,3 +17,7 @@ services:
     App\Controller\:
         resource: '../src/Controller/'
         tags: ['controller.service_arguments']
+
+    App\Controller\ProfileImageController:
+        bind:
+            $userImagesDirectory: '%user_images_directory%'

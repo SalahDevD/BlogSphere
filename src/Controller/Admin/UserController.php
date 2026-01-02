@@ -16,7 +16,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 #[IsGranted('ROLE_ADMIN')]
 class UserController extends AbstractController
 {
-    #[Route('/', name: 'admin_user_index')]
+    #[Route('/', name: 'admin_users_index')]
     public function index(UserRepository $userRepository): Response
     {
         return $this->render('admin/users/index.html.twig', [
@@ -24,7 +24,7 @@ class UserController extends AbstractController
         ]);
     }
 
-    #[Route('/new', name: 'admin_user_new')]
+    #[Route('/new', name: 'admin_users_new')]
     public function new(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher): Response
     {
         $user = new User();
@@ -32,6 +32,14 @@ class UserController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Ensure firstName and lastName are set
+            if (!$user->getFirstName()) {
+                $user->setFirstName($user->getName());
+            }
+            if (!$user->getLastName()) {
+                $user->setLastName($user->getName());
+            }
+            
             $hashedPassword = $passwordHasher->hashPassword($user, $user->getPassword());
             $user->setPassword($hashedPassword);
             
@@ -39,7 +47,7 @@ class UserController extends AbstractController
             $em->flush();
 
             $this->addFlash('success', 'Utilisateur créé avec succès !');
-            return $this->redirectToRoute('admin_user_index');
+            return $this->redirectToRoute('admin_users_index');
         }
 
         return $this->render('admin/users/new.html.twig', [
@@ -47,16 +55,30 @@ class UserController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'admin_user_edit')]
-    public function edit(Request $request, User $user, EntityManagerInterface $em): Response
+    #[Route('/{id}/edit', name: 'admin_users_edit')]
+    public function edit(Request $request, User $user, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher): Response
     {
         $form = $this->createForm(UserType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Ensure firstName and lastName are set
+            if (!$user->getFirstName()) {
+                $user->setFirstName($user->getName());
+            }
+            if (!$user->getLastName()) {
+                $user->setLastName($user->getName());
+            }
+            
+            // Hash password if changed
+            if ($form->get('password')->getData()) {
+                $hashedPassword = $passwordHasher->hashPassword($user, $form->get('password')->getData());
+                $user->setPassword($hashedPassword);
+            }
+            
             $em->flush();
             $this->addFlash('success', 'Utilisateur modifié avec succès !');
-            return $this->redirectToRoute('admin_user_index');
+            return $this->redirectToRoute('admin_users_index');
         }
 
         return $this->render('admin/users/edit.html.twig', [
@@ -65,7 +87,7 @@ class UserController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/toggle', name: 'admin_user_toggle')]
+    #[Route('/{id}/toggle', name: 'admin_users_toggle', methods: ['POST'])]
     public function toggleStatus(User $user, EntityManagerInterface $em): Response
     {
         $user->setIsActive(!$user->isActive());
@@ -74,10 +96,10 @@ class UserController extends AbstractController
         $status = $user->isActive() ? 'activé' : 'désactivé';
         $this->addFlash('success', "Utilisateur $status avec succès !");
         
-        return $this->redirectToRoute('admin_user_index');
+        return $this->redirectToRoute('admin_users_index');
     }
 
-    #[Route('/{id}/delete', name: 'admin_user_delete', methods: ['POST'])]
+    #[Route('/{id}/delete', name: 'admin_users_delete', methods: ['POST'])]
     public function delete(Request $request, User $user, EntityManagerInterface $em): Response
     {
         if ($this->isCsrfTokenValid('delete'.$user->getId(), $request->request->get('_token'))) {
@@ -86,6 +108,6 @@ class UserController extends AbstractController
             $this->addFlash('success', 'Utilisateur supprimé avec succès !');
         }
 
-        return $this->redirectToRoute('admin_user_index');
+        return $this->redirectToRoute('admin_users_index');
     }
 }

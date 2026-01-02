@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Support - BlogSphere{% endblock %}
+{% block title %}Chatbot - BlogSphere{% endblock %}
 
 {% block stylesheets %}
 <style>
@@ -50,6 +50,8 @@
         padding: 1rem 1.5rem;
         border-radius: 16px;
         word-wrap: break-word;
+        white-space: pre-wrap;
+        line-height: 1.5;
     }
 
     .message-sent .message-bubble {
@@ -109,10 +111,59 @@
         background: #e65a2f;
     }
 
+    .chat-input button:disabled {
+        background: var(--gray-400);
+        cursor: not-allowed;
+    }
+
     .empty-chat {
         text-align: center;
         color: var(--gray-500);
         padding: 3rem;
+    }
+
+    .typing-indicator {
+        display: flex;
+        gap: 4px;
+        padding: 1rem 1.5rem;
+    }
+
+    .typing-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--gray-400);
+        animation: typing 1.4s infinite;
+    }
+
+    .typing-dot:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .typing-dot:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+
+    @keyframes typing {
+        0%, 60%, 100% {
+            opacity: 0.5;
+            transform: translateY(0);
+        }
+        30% {
+            opacity: 1;
+            transform: translateY(-10px);
+        }
+    }
+
+    .chatbot-badge {
+        display: inline-block;
+        background: #e0f2fe;
+        color: #0369a1;
+        padding: 0.25rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
     }
 </style>
 {% endblock %}
@@ -120,33 +171,36 @@
 {% block body %}
 <div class="chat-container">
     <div class="chat-header">
-        <h1 class="chat-title">💬 Support - Chat avec les superviseurs</h1>
-        <p style="color: var(--gray-600); margin-top: 0.5rem;">Posez vos questions, nous sommes là pour vous aider !</p>
+        <h1 class="chat-title">🤖 ChatBot - Assistance Automatisée</h1>
+        <p style="color: var(--gray-600); margin-top: 0.5rem;">Posez vos questions, notre chatbot intelligent vous répondra instantanément !</p>
     </div>
 
     <div class="chat-messages" id="chatMessages">
         {% if messages|length > 0 %}
             {% for message in messages %}
-                <div class="message {% if message.sender == app.user %}message-sent{% else %}message-received{% endif %}">
+                <div class="message {% if message.isFromUser %}message-sent{% else %}message-received{% endif %}">
+                    {% if not message.isFromUser %}
+                        <span class="chatbot-badge">🤖 ChatBot</span>
+                    {% endif %}
                     <div class="message-bubble">
                         {{ message.content }}
                     </div>
                     <div class="message-meta">
-                        {{ message.sender.name }} • {{ message.createdAt|date('d/m/Y H:i') }}
+                        {{ message.createdAtTime }}
                     </div>
                 </div>
             {% endfor %}
         {% else %}
             <div class="empty-chat">
-                👋 Bienvenue ! Commencez une conversation avec notre équipe de support.
+                👋 Bienvenue ! Bonjour, je suis votre assistant ChatBot. Posez-moi vos questions, je suis là pour vous aider !
             </div>
         {% endif %}
     </div>
 
     <div class="chat-input">
-        <form method="POST">
-            <textarea name="message" rows="3" placeholder="Écrivez votre message..." required></textarea>
-            <button type="submit">Envoyer</button>
+        <form method="POST" id="chatForm">
+            <textarea name="message" id="messageInput" rows="3" placeholder="Posez votre question..." required></textarea>
+            <button type="submit" id="sendBtn">Envoyer</button>
         </form>
     </div>
 </div>
@@ -155,5 +209,105 @@
 // Auto-scroll vers le bas
 const chatMessages = document.getElementById('chatMessages');
 chatMessages.scrollTop = chatMessages.scrollHeight;
+
+// Gestion du formulaire et du chatbot
+document.getElementById('chatForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const messageInput = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const userMessage = messageInput.value.trim();
+
+    if (!userMessage) return;
+
+    // Afficher le message de l'utilisateur
+    const userMsgDiv = document.createElement('div');
+    userMsgDiv.className = 'message message-sent';
+    userMsgDiv.innerHTML = `
+        <div class="message-bubble">${userMessage}</div>
+        <div class="message-meta">${new Date().toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'})}</div>
+    `;
+    chatMessages.appendChild(userMsgDiv);
+
+    // Désactiver le bouton et effacer le champ
+    sendBtn.disabled = true;
+    messageInput.value = '';
+    messageInput.focus();
+
+    // Afficher l'indicateur de saisie
+    const typingDiv = document.createElement('div');
+    typingDiv.className = 'message message-received';
+    typingDiv.id = 'typing';
+    typingDiv.innerHTML = `
+        <span class="chatbot-badge">🤖 ChatBot</span>
+        <div class="typing-indicator">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+        </div>
+    `;
+    chatMessages.appendChild(typingDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    try {
+        const response = await fetch('{{ path("api_chat_send_message") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                content: userMessage
+            })
+        });
+
+        const data = await response.json();
+
+        // Supprimer l'indicateur de saisie
+        typingDiv.remove();
+
+        if (data.success) {
+            // Afficher la réponse du chatbot
+            const botMsgDiv = document.createElement('div');
+            botMsgDiv.className = 'message message-received';
+            botMsgDiv.innerHTML = `
+                <span class="chatbot-badge">🤖 ChatBot</span>
+                <div class="message-bubble">${data.botResponse}</div>
+                <div class="message-meta">${new Date().toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'})}</div>
+            `;
+            chatMessages.appendChild(botMsgDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        } else {
+            alert('Erreur: ' + data.error);
+        }
+    } catch (error) {
+        console.error('Erreur:', error);
+        typingDiv.remove();
+        alert('Erreur de connexion. Veuillez réessayer.');
+    } finally {
+        sendBtn.disabled = false;
+        messageInput.focus();
+    }
+});
+
+// Charger les messages à l'ouverture
+async function loadMessages() {
+    try {
+        const response = await fetch('{{ path("api_chat_get_messages") }}');
+        const messages = await response.json();
+        
+        // Les messages sont déjà affichés côté serveur, pas besoin de les recharger
+    } catch (error) {
+        console.error('Erreur lors du chargement des messages:', error);
+    }
+}
+
+// Permettre Shift+Enter pour envoyer le message
+document.getElementById('messageInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        document.getElementById('chatForm').dispatchEvent(new Event('submit'));
+    }
+});
 </script>
 {% endblock %}
+

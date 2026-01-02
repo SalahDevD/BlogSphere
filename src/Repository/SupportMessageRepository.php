@@ -25,6 +25,30 @@ class SupportMessageRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function findConversationsByUser(User $user): array
+    {
+        return $this->createQueryBuilder('sm')
+            ->where('sm.sender = :user')
+            ->andWhere('sm.parentMessage IS NULL')
+            ->setParameter('user', $user)
+            ->orderBy('sm.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findConversationThread(SupportMessage $message): array
+    {
+        $rootMessage = $message->getParentMessage() ?? $message;
+        
+        return $this->createQueryBuilder('sm')
+            ->where('sm.id = :rootId')
+            ->orWhere('sm.parentMessage = :rootId')
+            ->setParameter('rootId', $rootMessage->getId())
+            ->orderBy('sm.createdAt', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
     public function countUnreadMessagesForUser(User $user): int
     {
         return (int) $this->createQueryBuilder('sm')

@@ -95,6 +95,104 @@
         color: #721c24;
         border: 1px solid #f5c6cb;
     }
+
+    .profile-image-section {
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 2px solid var(--gray-200);
+    }
+
+    .profile-image-preview {
+        display: flex;
+        gap: 2rem;
+        align-items: flex-start;
+        margin-bottom: 1.5rem;
+    }
+
+    .profile-image-display {
+        width: 120px;
+        height: 120px;
+        border-radius: 12px;
+        overflow: hidden;
+        background: var(--gray-200);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+    }
+
+    .profile-image-display img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .profile-image-info {
+        flex: 1;
+    }
+
+    .profile-image-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .btn-upload-profile {
+        padding: 0.75rem 1.5rem;
+        background: var(--orange-primary);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+
+    .btn-upload-profile:hover {
+        background: var(--orange-dark);
+        transform: translateY(-2px);
+    }
+
+    .btn-remove-profile {
+        padding: 0.75rem 1.5rem;
+        background: #ef4444;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+
+    .btn-remove-profile:hover {
+        background: #dc2626;
+        transform: translateY(-2px);
+    }
+
+    #profileImageInput {
+        display: none;
+    }
+
+    .upload-status {
+        margin-top: 1rem;
+        padding: 1rem;
+        border-radius: 8px;
+        display: none;
+    }
+
+    .upload-status.success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+        display: block;
+    }
+
+    .upload-status.error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+        display: block;
+    }
 </style>
 {% endblock %}
 
@@ -113,6 +211,51 @@
         {% endfor %}
 
         <form method="POST">
+            {# Section Image de Profil #}
+            <div class="profile-image-section">
+                <h2 class="edit-profile-title" style="font-size: 1.25rem; margin-bottom: 1rem;">🖼️ Image de profil</h2>
+                
+                <div class="profile-image-preview">
+                    <div class="profile-image-display" id="profileImageDisplay">
+                        {% set profileImage = user.images|filter(img => img.isProfile)|first %}
+                        {% if profileImage %}
+                            <img src="{{ asset('uploads/profile/' ~ profileImage.filename) }}" alt="Profile">
+                        {% else %}
+                            {{ user.name|first|upper }}
+                        {% endif %}
+                    </div>
+                    
+                    <div class="profile-image-info">
+                        <p style="color: var(--gray-700); margin-bottom: 0.5rem;">
+                            <strong>Image actuelle</strong>
+                        </p>
+                        <p style="color: var(--gray-600); font-size: 0.9rem; margin-bottom: 1rem;">
+                            {% if profileImage %}
+                                Image de profil définie
+                            {% else %}
+                                Aucune image de profil définie
+                            {% endif %}
+                        </p>
+                        
+                        <div class="profile-image-actions">
+                            <button type="button" class="btn-upload-profile" onclick="document.getElementById('profileImageInput').click();">
+                                📤 Modifier l'image
+                            </button>
+                            {% if profileImage %}
+                                <button type="button" class="btn-remove-profile" onclick="removeProfileImage();">
+                                    🗑️ Supprimer
+                                </button>
+                            {% endif %}
+                        </div>
+                        
+                        <div id="uploadStatus" class="upload-status"></div>
+                    </div>
+                </div>
+
+                <input type="file" id="profileImageInput" accept="image/*" style="display: none;">
+            </div>
+
+            {# Section Informations #}
             <div class="form-group">
                 <label class="form-label" for="name">Nom complet <span style="color: var(--orange-primary);">*</span></label>
                 <input type="text" 
@@ -177,6 +320,99 @@
             } else {
                 charCount.style.color = 'var(--gray-500)';
             }
+        });
+    }
+
+    // Gestion de l'image de profil
+    const profileImageInput = document.getElementById('profileImageInput');
+    const uploadStatus = document.getElementById('uploadStatus');
+
+    if (profileImageInput) {
+        profileImageInput.addEventListener('change', function(e) {
+            if (this.files.length === 0) return;
+
+            const file = this.files[0];
+            const formData = new FormData();
+            formData.append('image', file);
+
+            // Afficher le statut de chargement
+            uploadStatus.textContent = '⏳ Upload en cours...';
+            uploadStatus.className = 'upload-status';
+            uploadStatus.style.display = 'block';
+
+            fetch('{{ path('profile_images_upload') }}', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Marquer comme image de profil
+                    return fetch(`/profile/images/${data.imageId}/set-profile`, {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    }).then(res => res.json());
+                } else {
+                    throw new Error(data.error || 'Erreur lors de l\'upload');
+                }
+            })
+            .then(data => {
+                if (data.success) {
+                    uploadStatus.textContent = '✅ Image de profil mise à jour avec succès!';
+                    uploadStatus.className = 'upload-status success';
+                    // Recharger la prévisualisation
+                    setTimeout(() => location.reload(), 1500);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                uploadStatus.textContent = '❌ Erreur: ' + error.message;
+                uploadStatus.className = 'upload-status error';
+            })
+            .finally(() => {
+                profileImageInput.value = '';
+            });
+        });
+    }
+
+    function removeProfileImage() {
+        if (!confirm('Êtes-vous sûr de vouloir supprimer votre image de profil?')) return;
+
+        const removeBtn = event.target.closest('.btn-remove-profile');
+        removeBtn.disabled = true;
+        uploadStatus.textContent = '⏳ Suppression en cours...';
+        uploadStatus.className = 'upload-status';
+        uploadStatus.style.display = 'block';
+
+        // Trouver l'ID de l'image de profil
+        fetch('/profile/images/api/user-images', {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(images => {
+            const profileImage = images.find(img => img.isProfile);
+            if (!profileImage) {
+                throw new Error('Image de profil non trouvée');
+            }
+            return fetch(`/profile/images/${profileImage.id}/delete`, { method: 'POST' });
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                uploadStatus.textContent = '✅ Image supprimée avec succès!';
+                uploadStatus.className = 'upload-status success';
+                setTimeout(() => location.reload(), 1500);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            uploadStatus.textContent = '❌ Erreur: ' + error.message;
+            uploadStatus.className = 'upload-status error';
+            removeBtn.disabled = false;
         });
     }
 </script>

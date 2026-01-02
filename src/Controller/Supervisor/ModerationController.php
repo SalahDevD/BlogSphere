@@ -7,6 +7,7 @@ use App\Repository\ArticleRepository;
 use App\Repository\ReportRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -95,6 +96,41 @@ class ModerationController extends AbstractController
         return $this->redirectToRoute('supervisor_moderation_dashboard');
     }
 
+    #[Route('/article/{id}/delete', name: 'delete_article', methods: ['POST'])]
+    public function deleteArticle(
+        Request $request,
+        Article $article,
+        EntityManagerInterface $em
+    ): Response {
+        if ($this->isCsrfTokenValid('delete' . $article->getId(), $request->request->get('_token'))) {
+            // Supprimer tous les rapports associés à cet article
+            foreach ($article->getReports() as $report) {
+                $em->remove($report);
+            }
+            // Supprimer tous les commentaires et leurs rapports/réactions associés
+            foreach ($article->getComments() as $comment) {
+                foreach ($comment->getReports() as $report) {
+                    $em->remove($report);
+                }
+                foreach ($comment->getReactions() as $reaction) {
+                    $em->remove($reaction);
+                }
+                $em->remove($comment);
+            }
+            // Supprimer les réactions à l'article
+            foreach ($article->getReactions() as $reaction) {
+                $em->remove($reaction);
+            }
+            
+            $em->remove($article);
+            $em->flush();
+
+            $this->addFlash('success', '🗑️ Article supprimé définitivement.');
+        }
+
+        return $this->redirectToRoute('supervisor_moderation_dashboard');
+    }
+
     #[Route('/reports', name: 'reports', methods: ['GET'])]
     public function listReports(ReportRepository $reportRepository): Response
     {
@@ -139,9 +175,36 @@ class ModerationController extends AbstractController
 
         // Supprimer l'article ou le commentaire signalé
         if ($article = $report->getArticle()) {
+            // Supprimer tous les rapports associés à cet article
+            foreach ($article->getReports() as $relatedReport) {
+                $em->remove($relatedReport);
+            }
+            // Supprimer tous les commentaires et leurs rapports associés
+            foreach ($article->getComments() as $comment) {
+                foreach ($comment->getReports() as $commentReport) {
+                    $em->remove($commentReport);
+                }
+                // Supprimer les réactions au commentaire
+                foreach ($comment->getReactions() as $reaction) {
+                    $em->remove($reaction);
+                }
+                $em->remove($comment);
+            }
+            // Supprimer les réactions à l'article
+            foreach ($article->getReactions() as $reaction) {
+                $em->remove($reaction);
+            }
             $em->remove($article);
             $message = '✅ Article supprimé avec succès.';
         } elseif ($comment = $report->getComment()) {
+            // Supprimer tous les rapports associés à ce commentaire
+            foreach ($comment->getReports() as $relatedReport) {
+                $em->remove($relatedReport);
+            }
+            // Supprimer les réactions au commentaire
+            foreach ($comment->getReactions() as $reaction) {
+                $em->remove($reaction);
+            }
             $em->remove($comment);
             $message = '✅ Commentaire supprimé avec succès.';
         } else {

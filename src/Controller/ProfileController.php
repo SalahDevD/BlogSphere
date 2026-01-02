@@ -56,12 +56,16 @@ class ProfileController extends AbstractController
             ]),
             'totalComments' => $commentRepository->count(['author' => $user])
         ];
+
+        // Vérifier si l'utilisateur a au moins un article approuvé
+        $hasApprovedArticle = $stats['publishedArticles'] > 0;
         
         return $this->render('profile/index.html.twig', [
             'user' => $user,
             'articles' => $myArticles,
             'comments' => $myComments,
-            'stats' => $stats
+            'stats' => $stats,
+            'hasApprovedArticle' => $hasApprovedArticle
         ]);
     }
     

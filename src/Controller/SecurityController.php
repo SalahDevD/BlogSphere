@@ -56,6 +56,10 @@ class SecurityController extends AbstractController
                 $user->setPassword($hashedPassword);
             }
             
+            // Générer le nom complet à partir du prénom et du nom
+            $fullName = $user->getFirstName() . ' ' . $user->getLastName();
+            $user->setName($fullName);
+            
             // Définir les rôles et le statut
             $user->setRoles(['ROLE_USER']);
 

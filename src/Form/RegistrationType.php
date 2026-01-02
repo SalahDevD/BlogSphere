@@ -16,25 +16,47 @@ class RegistrationType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('name', TextType::class, [
-                'label' => 'Nom complet',
+            ->add('firstName', TextType::class, [
+                'label' => 'Prénom',
                 'attr' => [
-                    'placeholder' => 'Jean Dupont',
+                    'placeholder' => 'Jean',
                     'class' => 'form-control'
                 ],
                 'constraints' => [
                     new Assert\NotBlank([
-                        'message' => 'Le nom ne peut pas être vide.'
+                        'message' => 'Le prénom ne peut pas être vide.'
                     ]),
                     new Assert\Length([
-                        'min' => 3,
+                        'min' => 2,
                         'max' => 100,
-                        'minMessage' => 'Le nom doit contenir au moins {{ limit }} caractères.',
-                        'maxMessage' => 'Le nom ne peut pas dépasser {{ limit }} caractères.'
+                        'minMessage' => 'Le prénom doit contenir au moins {{ limit }} caractères.',
+                        'maxMessage' => 'Le prénom ne peut pas dépasser {{ limit }} caractères.'
                     ]),
                     new Assert\Regex([
                         'pattern' => '/^[a-zA-ZÀ-ÿ\s\-\']+$/',
-                        'message' => 'Le nom ne peut contenir que des lettres, espaces, tirets et apostrophes.'
+                        'message' => 'Le prénom ne peut contenir que des lettres, espaces, tirets et apostrophes.'
+                    ])
+                ]
+            ])
+            ->add('lastName', TextType::class, [
+                'label' => 'Nom de famille',
+                'attr' => [
+                    'placeholder' => 'Dupont',
+                    'class' => 'form-control'
+                ],
+                'constraints' => [
+                    new Assert\NotBlank([
+                        'message' => 'Le nom de famille ne peut pas être vide.'
+                    ]),
+                    new Assert\Length([
+                        'min' => 2,
+                        'max' => 100,
+                        'minMessage' => 'Le nom de famille doit contenir au moins {{ limit }} caractères.',
+                        'maxMessage' => 'Le nom de famille ne peut pas dépasser {{ limit }} caractères.'
+                    ]),
+                    new Assert\Regex([
+                        'pattern' => '/^[a-zA-ZÀ-ÿ\s\-\']+$/',
+                        'message' => 'Le nom de famille ne peut contenir que des lettres, espaces, tirets et apostrophes.'
                     ])
                 ]
             ])

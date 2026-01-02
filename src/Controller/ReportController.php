@@ -45,7 +45,7 @@ class ReportController extends AbstractController
         
         // Vérifier si l'utilisateur a déjà signalé cet article
         $existingReport = $reportRepository->findOneBy([
-            'user' => $user,
+            'reporter' => $user,
             'article' => $article
         ]);
         
@@ -55,7 +55,7 @@ class ReportController extends AbstractController
         
         // Créer le signalement et l'envoyer au superviseur
         $report = new Report();
-        $report->setUser($user);
+        $report->setReporter($user);
         $report->setArticle($article);
         $report->setReason($reason);
         $report->setStatus('PENDING');
@@ -98,7 +98,7 @@ class ReportController extends AbstractController
         
         // Vérifier si l'utilisateur a déjà signalé ce commentaire
         $existingReport = $reportRepository->findOneBy([
-            'user' => $user,
+            'reporter' => $user,
             'comment' => $comment
         ]);
         
@@ -108,7 +108,7 @@ class ReportController extends AbstractController
         
         // Créer le signalement et l'envoyer au superviseur
         $report = new Report();
-        $report->setUser($user);
+        $report->setReporter($user);
         $report->setComment($comment);
         $report->setReason($reason);
         $report->setStatus('PENDING');

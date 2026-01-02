@@ -11,11 +11,29 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Doctrine\ORM\EntityManagerInterface;
 
-#[Route('/api/supervisor/support', name: 'api_supervisor_support')]
+#[Route('/supervisor')]
 #[IsGranted('ROLE_SUPERVISOR')]
 class SupportController extends AbstractController
 {
-    #[Route('/messages/pending', name: 'supervisor_support_pending', methods: ['GET'])]
+    #[Route('/messages', name: 'supervisor_messages')]
+    public function messages(SupportMessageRepository $messageRepository): Response
+    {
+        // Get all support messages (both pending and resolved)
+        $pendingMessages = $messageRepository->findBy([], ['createdAt' => 'DESC']);
+        
+        return $this->render('supervisor/messages.html.twig', [
+            'messages' => $pendingMessages
+        ]);
+    }
+
+    #[Route('/api/support', name: 'api_supervisor_support')]
+    public function apiSupport(): Response
+    {
+        // API routes below
+        return $this->json(['error' => 'Not Found'], 404);
+    }
+
+    #[Route('/api/support/messages/pending', name: 'supervisor_support_pending', methods: ['GET'])]
     public function listPendingMessages(SupportMessageRepository $messageRepository): Response
     {
         $messages = $messageRepository->findBy(['status' => 'PENDING'], ['createdAt' => 'ASC']);
@@ -36,7 +54,7 @@ class SupportController extends AbstractController
         return $this->json($data);
     }
     
-    #[Route('/message/{id}/respond', name: 'supervisor_support_respond', methods: ['POST'])]
+    #[Route('/api/support/message/{id}/respond', name: 'supervisor_support_respond', methods: ['POST'])]
     public function respondToMessage(
         int $id,
         Request $request,
@@ -68,7 +86,7 @@ class SupportController extends AbstractController
         ]);
     }
     
-    #[Route('/messages/resolved', name: 'supervisor_support_resolved', methods: ['GET'])]
+    #[Route('/api/support/messages/resolved', name: 'supervisor_support_resolved', methods: ['GET'])]
     public function listResolvedMessages(SupportMessageRepository $messageRepository): Response
     {
         $messages = $messageRepository->findBy(['status' => 'RESOLVED'], ['respondedAt' => 'DESC'], 50);
@@ -90,7 +108,7 @@ class SupportController extends AbstractController
         return $this->json($data);
     }
     
-    #[Route('/message/{id}/close', name: 'supervisor_support_close', methods: ['POST'])]
+    #[Route('/api/support/message/{id}/close', name: 'supervisor_support_close', methods: ['POST'])]
     public function closeMessage(
         int $id,
         SupportMessageRepository $messageRepository,

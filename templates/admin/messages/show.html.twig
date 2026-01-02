@@ -1,0 +1,229 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Message - Admin - BlogSphere{% endblock %}
+
+{% block stylesheets %}
+<style>
+    :root {
+        --orange-primary: #FF6B35;
+        --orange-dark: #E85A2A;
+        --gray-900: #111827;
+        --gray-700: #374151;
+        --gray-600: #4b5563;
+        --gray-200: #e5e7eb;
+        --gray-50: #f9fafb;
+        --white: #ffffff;
+    }
+
+    .message-detail-container {
+        background: var(--gray-50);
+        min-height: 100vh;
+        padding: 4rem 0;
+    }
+
+    .container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: var(--gray-200);
+        color: var(--gray-700);
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 600;
+        margin-bottom: 2rem;
+        transition: all 0.3s;
+    }
+
+    .back-btn:hover {
+        background: var(--gray-300);
+    }
+
+    .message-container {
+        background: var(--white);
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        margin-bottom: 2rem;
+    }
+
+    .message-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 2px solid var(--gray-200);
+    }
+
+    .message-title {
+        font-size: 2rem;
+        font-weight: 900;
+        color: var(--gray-900);
+        margin-bottom: 0.5rem;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .status-pending {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-resolved {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .user-info {
+        background: var(--gray-50);
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+
+    .user-info-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.75rem;
+    }
+
+    .user-info-row:last-child {
+        margin-bottom: 0;
+    }
+
+    .user-info-label {
+        font-weight: 600;
+        color: var(--gray-700);
+    }
+
+    .user-info-value {
+        color: var(--gray-600);
+    }
+
+    .message-content {
+        color: var(--gray-700);
+        line-height: 1.8;
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: var(--gray-50);
+        border-left: 4px solid var(--orange-primary);
+        border-radius: 4px;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .btn {
+        flex: 1;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        text-align: center;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--orange-primary), var(--orange-dark));
+        color: var(--white);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(255, 107, 53, 0.3);
+    }
+
+    .btn-secondary {
+        background: var(--gray-200);
+        color: var(--gray-700);
+    }
+
+    .btn-secondary:hover {
+        background: var(--gray-300);
+    }
+
+    @media (max-width: 768px) {
+        .message-header {
+            flex-direction: column;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .container {
+            padding: 0 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="message-detail-container">
+    <div class="container">
+        <a href="{{ path('admin_messages_index') }}" class="back-btn">← Retour aux messages</a>
+
+        <div class="message-container">
+            <div class="message-header">
+                <div>
+                    <h1 class="message-title">{{ message.subject }}</h1>
+                </div>
+                <span class="status-badge status-{{ message.status|lower }}">
+                    {% if message.status == 'pending' %}Nouveau{% else %}Résolu{% endif %}
+                </span>
+            </div>
+
+            <div class="user-info">
+                <div class="user-info-row">
+                    <span class="user-info-label">👤 Utilisateur:</span>
+                    <span class="user-info-value">{{ message.user.name }}</span>
+                </div>
+                <div class="user-info-row">
+                    <span class="user-info-label">📧 Email:</span>
+                    <span class="user-info-value">{{ message.user.email }}</span>
+                </div>
+                <div class="user-info-row">
+                    <span class="user-info-label">📅 Date d'envoi:</span>
+                    <span class="user-info-value">{{ message.createdAt|date('d M Y H:i') }}</span>
+                </div>
+            </div>
+
+            <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--gray-900); margin-bottom: 1rem;">Message:</h3>
+            <div class="message-content">
+                {{ message.message|nl2br }}
+            </div>
+
+            {% if message.response %}
+                <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--gray-900); margin-bottom: 1rem;">Réponse:</h3>
+                <div class="message-content" style="border-left-color: #10b981;">
+                    {{ message.response|nl2br }}
+                </div>
+            {% endif %}
+
+            <div class="action-buttons">
+                <a href="#" class="btn btn-secondary">📧 Répondre</a>
+                <a href="#" class="btn btn-primary">✅ Marquer comme résolu</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

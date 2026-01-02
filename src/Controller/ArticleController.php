@@ -3,8 +3,10 @@
 namespace App\Controller;
 
 use App\Entity\Article;
+use App\Entity\Category;
 use App\Form\ArticleType;
 use App\Repository\ArticleRepository;
+use App\Repository\CategoryRepository;
 use App\Repository\ReactionRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -24,22 +26,74 @@ class ArticleController extends AbstractController
     }
 
     #[Route('', name: '_index', methods: ['GET'])]
-    public function index(ArticleRepository $articleRepository): Response
+    public function index(ArticleRepository $articleRepository, CategoryRepository $categoryRepository, Request $request): Response
     {
-        $articles = $articleRepository->findBy(
-            ['validationStatus' => 'approved'],
-            ['createdAt' => 'DESC']
-        );
+        $categoryId = $request->query->get('category');
+        $searchQuery = $request->query->get('search');
+        
+        if ($searchQuery) {
+            // Search by title or content
+            $articles = $articleRepository->createQueryBuilder('a')
+                ->where('a.validationStatus = :status')
+                ->andWhere('(a.title LIKE :search OR a.content LIKE :search)')
+                ->setParameter('status', 'approved')
+                ->setParameter('search', '%' . $searchQuery . '%')
+                ->orderBy('a.createdAt', 'DESC')
+                ->getQuery()
+                ->getResult();
+        } elseif ($categoryId) {
+            $category = $categoryRepository->find($categoryId);
+            if ($category) {
+                $articles = $articleRepository->findBy(
+                    ['validationStatus' => 'approved', 'category' => $category],
+                    ['createdAt' => 'DESC']
+                );
+            } else {
+                $articles = [];
+            }
+        } else {
+            $articles = $articleRepository->findBy(
+                ['validationStatus' => 'approved'],
+                ['createdAt' => 'DESC']
+            );
+        }
+
+        $categories = $categoryRepository->findAll();
+        $selectedCategory = $categoryId ? $categoryRepository->find($categoryId) : null;
 
         return $this->render('article/index.html.twig', [
             'articles' => $articles,
+            'categories' => $categories,
+            'selectedCategory' => $selectedCategory,
+            'searchQuery' => $searchQuery,
         ]);
     }
 
     #[Route('/new', name: '_new', methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_USER')]
-    public function new(Request $request, EntityManagerInterface $em): Response
+    public function new(Request $request, EntityManagerInterface $em, ArticleRepository $articleRepository): Response
     {
+        $user = $this->getUser();
+        
+        // Vérifier si l'utilisateur a un article approuvé pour pouvoir créer d'autres articles directement
+        $hasApprovedArticle = $articleRepository->count([
+            'author' => $user,
+            'validationStatus' => 'approved'
+        ]) > 0;
+
+        // Si on est en GET et qu'il n'a pas d'article approuvé ET qu'il a un article pending, rediriger avec message
+        if ($request->getMethod() === 'GET') {
+            $pendingCount = $articleRepository->count([
+                'author' => $user,
+                'validationStatus' => 'pending'
+            ]);
+            
+            if (!$hasApprovedArticle && $pendingCount > 0) {
+                $this->addFlash('warning', '⏳ Vous avez un premier article en attente de validation. Une fois approuvé, vous pourrez créer d\'autres articles.');
+                return $this->redirectToRoute('user_profile_index');
+            }
+        }
+
         $article = new Article();
         $form = $this->createForm(ArticleType::class, $article);
         $form->handleRequest($request);
@@ -61,13 +115,24 @@ class ArticleController extends AbstractController
                 $article->setImage($newFilename);
             }
 
-            $article->setAuthor($this->getUser());
-            $article->setValidationStatus('pending');
+            $article->setAuthor($user);
             $article->setCreatedAt(new \DateTime());
+
+            // Vérifier si c'est le premier article APPROUVÉ de l'utilisateur
+            if (!$hasApprovedArticle) {
+                // Premier article: mise en attente de validation du superviseur
+                $article->setValidationStatus('pending');
+                $message = '📨 Votre premier article a été soumis et est en attente de validation par un superviseur. Une fois validé, vous pourrez publier directement vos prochains articles.';
+            } else {
+                // Articles suivants: publié directement
+                $article->setValidationStatus('approved');
+                $message = '✅ Votre article a été publié avec succès !';
+            }
+
             $em->persist($article);
             $em->flush();
 
-            $this->addFlash('info', '📨 Votre article a été soumis et est en attente de validation.');
+            $this->addFlash('info', $message);
             return $this->redirectToRoute('app_article_index');
         }
 

@@ -38,6 +38,13 @@
         font-size: 3rem;
         font-weight: 700;
         box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+        overflow: hidden;
+    }
+
+    .profile-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
     }
 
     .profile-details {
@@ -291,7 +298,12 @@
     <div class="profile-header">
         <div class="profile-info">
             <div class="profile-avatar">
-                {{ user.name|first|upper }}
+                {% set profileImage = user.images|filter(img => img.isProfile)|first %}
+                {% if profileImage %}
+                    <img src="{{ asset('uploads/profile/' ~ profileImage.filename) }}" alt="Profile">
+                {% else %}
+                    {{ user.name|first|upper }}
+                {% endif %}
             </div>
             <div class="profile-details">
                 <h1 class="profile-name">{{ user.name }}</h1>
@@ -338,7 +350,9 @@
     <div class="articles-section">
         <div class="section-header">
             <h2 class="section-title">📚 Mes Articles</h2>
-            <a href="{{ path('app_article_new') }}" class="btn">➕ Nouvel article</a>
+            {% if hasApprovedArticle %}
+                <a href="{{ path('app_article_new') }}" class="btn">➕ Nouvel article</a>
+            {% endif %}
         </div>
 
         {% if articles|length > 0 %}
@@ -346,7 +360,7 @@
                 {% for article in articles %}
                     <div class="article-card">
                         {% if article.image %}
-                            <img src="{{ asset('uploads/' ~ article.image) }}" alt="{{ article.title }}" class="article-card-image">
+                            <img src="{{ asset('uploads/articles/' ~ article.image) }}" alt="{{ article.title }}" class="article-card-image">
                         {% else %}
                             <div class="article-card-image" style="background: linear-gradient(135deg, var(--orange-primary), var(--orange-dark)); display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem;">
                                 📄
@@ -381,7 +395,7 @@
                                     ✏️ Modifier
                                 </a>
                                 <form method="POST" action="{{ path('app_article_delete', {id: article.id}) }}" style="display: inline;">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('delete_article_' ~ article.id) }}">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ article.id) }}">
                                     <button type="submit" class="btn-small btn-delete" onclick="return confirm('Supprimer cet article ?')">
                                         🗑️ Supprimer
                                     </button>
@@ -394,8 +408,14 @@
         {% else %}
             <div class="empty-state">
                 <div class="empty-state-icon">📝</div>
-                <p style="font-size: 1.125rem; margin-bottom: 1rem;">Vous n'avez pas encore d'articles</p>
-                <a href="{{ path('app_article_new') }}" class="btn">Créer mon premier article</a>
+                {% if hasApprovedArticle %}
+                    <p style="font-size: 1.125rem; margin-bottom: 1rem;">Créez un nouvel article</p>
+                    <a href="{{ path('app_article_new') }}" class="btn">➕ Nouvel article</a>
+                {% else %}
+                    <p style="font-size: 1.125rem; margin-bottom: 1rem;">Vous n'avez pas encore d'articles</p>
+                    <a href="{{ path('app_article_new') }}" class="btn">Créer mon premier article</a>
+                    <p style="font-size: 0.9rem; color: #6b5563; margin-top: 1rem;">Votre premier article sera soumis à validation par un superviseur. Une fois approuvé, vous pourrez publier librement vos prochains articles.</p>
+                {% endif %}
             </div>
         {% endif %}
     </div>

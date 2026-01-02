@@ -15,11 +15,11 @@ class HomeController extends AbstractController
         // 🎯 Articles les plus aimés pour le carousel (uniquement validés)
         $popularArticles = $articleRepository->findPopularArticles(5);
         
-        // 📰 Derniers articles approuvés
+        // 📰 Derniers articles approuvés (les 3 derniers créés)
         $latestArticles = $articleRepository->findBy(
             ['validationStatus' => 'approved'],
             ['createdAt' => 'DESC'],
-            10
+            3
         );
         
         return $this->render('home/index.html.twig', [

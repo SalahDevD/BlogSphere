@@ -49,7 +49,7 @@
         </div>
 
         {% if article.image %}
-            <img src="{{ asset('uploads/articles/' ~ article.image) }}" alt="{{ article.title }}" style="width: 100%; max-height: 500px; object-fit: cover; border-radius: 12px; margin-bottom: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+            <img src="{{ asset('uploads/articles/' ~ article.image) }}" alt="{{ article.title }}" style="width: 100%; max-height: 500px; object-fit: cover; border-radius: 12px; margin-bottom: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08);" onerror="this.style.display='none';">
         {% endif %}
 
         <div style="background: white; padding: 2rem; border-radius: 12px; margin-bottom: 2rem; font-size: 1.1rem; color: #374151; line-height: 1.8; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
@@ -58,7 +58,13 @@
 
         {# ============= SECTION RÉACTIONS ============= #}
         <div style="background: white; padding: 2rem; border-radius: 12px; margin-bottom: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
-            <h3 style="font-size: 1.25rem; font-weight: 700; color: #111827; margin-bottom: 1.5rem;">Votre avis</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h3 style="font-size: 1.25rem; font-weight: 700; color: #111827;">Votre avis</h3>
+                
+                {% if is_granted('ROLE_USER') and article.author != app.user %}
+                    <button id="reportBtn" class="btn-report" style="padding: 0.5rem 1rem; background: #f97316; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9rem;">🚩 Signaler</button>
+                {% endif %}
+            </div>
             
             {% if is_granted('ROLE_USER') %}
                 <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
@@ -158,8 +164,15 @@
                 {% for comment in article.comments %}
                     {% if comment.status == 'approved' %}
                         <div style="background: #f9fafb; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #FF6B35;">
-                            <strong style="color: #111827; display: block; margin-bottom: 0.5rem; font-size: 1rem;">{{ comment.author.name }}</strong>
-                            <small style="color: #6b5563; display: block; margin-bottom: 1rem; font-size: 0.85rem;">{{ comment.createdAt|date('d M Y H:i') }}</small>
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                                <div>
+                                    <strong style="color: #111827; display: block; margin-bottom: 0.5rem; font-size: 1rem;">{{ comment.author.name }}</strong>
+                                    <small style="color: #6b5563; display: block; margin-bottom: 1rem; font-size: 0.85rem;">{{ comment.createdAt|date('d M Y H:i') }}</small>
+                                </div>
+                                {% if is_granted('ROLE_USER') and comment.author != app.user %}
+                                    <button type="button" class="btn-report-comment" data-comment-id="{{ comment.id }}" style="padding: 0.4rem 0.8rem; background: #f97316; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.8rem; white-space: nowrap;">🚩 Signaler</button>
+                                {% endif %}
+                            </div>
                             <p style="color: #374151; line-height: 1.6; margin: 0;">{{ comment.content|nl2br }}</p>
                         </div>
                     {% endif %}
@@ -171,4 +184,155 @@
         </div>
     </div>
 </div>
+
+{# Modal de signalement #}
+<div id="reportModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center;">
+    <div style="background: white; border-radius: 12px; padding: 2rem; max-width: 500px; width: 90%; margin: auto; position: relative; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+        <h2 style="font-size: 1.5rem; font-weight: 700; color: #111827; margin-bottom: 1rem;">Signaler ce contenu</h2>
+        <p style="color: #6b5563; margin-bottom: 1.5rem;">Aidez-nous à améliorer la communauté en signalant un contenu inapproprié.</p>
+        
+        <form id="reportForm" style="display: flex; flex-direction: column; gap: 1rem;">
+            <div>
+                <label for="reportReason" style="display: block; font-weight: 600; color: #111827; margin-bottom: 0.5rem;">Raison du signalement *</label>
+                <select id="reportReason" name="reason" style="width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 1rem;" required>
+                    <option value="">Sélectionnez une raison</option>
+                    <option value="spam">Spam</option>
+                    <option value="inappropriate">Contenu inapproprié</option>
+                    <option value="harassment">Harcèlement</option>
+                    <option value="misinformation">Désinformation</option>
+                    <option value="copyright">Violation de droits d'auteur</option>
+                    <option value="other">Autre</option>
+                </select>
+            </div>
+            
+            <div>
+                <label for="reportDescription" style="display: block; font-weight: 600; color: #111827; margin-bottom: 0.5rem;">Description (optionnel)</label>
+                <textarea id="reportDescription" name="description" style="width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 1rem; min-height: 100px;" placeholder="Expliquez pourquoi vous signalez ce contenu..."></textarea>
+            </div>
+            
+            <div style="display: flex; gap: 1rem;">
+                <button type="button" onclick="closeReportModal()" style="flex: 1; padding: 0.75rem 1.5rem; background: #e5e7eb; color: #374151; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Annuler</button>
+                <button type="submit" style="flex: 1; padding: 0.75rem 1.5rem; background: #f97316; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Signaler</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    let reportType = null;
+    let reportId = null;
+
+    // Bouton de signalement article
+    const reportBtn = document.getElementById('reportBtn');
+    if (reportBtn) {
+        reportBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            reportType = 'article';
+            reportId = {{ article.id }};
+            console.log('Article report button clicked:', reportType, reportId);
+            openReportModal();
+        });
+    }
+
+    // Utiliser la délégation d'événements pour les boutons de signalement commentaires
+    document.addEventListener('click', (e) => {
+        const reportBtn = e.target.closest('.btn-report-comment');
+        if (reportBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            reportType = 'comment';
+            reportId = reportBtn.getAttribute('data-comment-id');
+            console.log('Comment report button clicked:', reportType, reportId, 'Button:', reportBtn);
+            openReportModal();
+        }
+    });
+
+    function openReportModal() {
+        const modal = document.getElementById('reportModal');
+        if (modal) {
+            modal.style.display = 'flex';
+            console.log('Modal opened with reportType:', reportType, 'reportId:', reportId);
+        }
+    }
+
+    function closeReportModal() {
+        const modal = document.getElementById('reportModal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+        document.getElementById('reportForm').reset();
+    }
+
+    // Fermer le modal en cliquant en dehors
+    const reportModal = document.getElementById('reportModal');
+    if (reportModal) {
+        reportModal.addEventListener('click', (e) => {
+            if (e.target.id === 'reportModal') {
+                closeReportModal();
+            }
+        });
+    }
+
+    // Soumettre le signalement
+    const reportForm = document.getElementById('reportForm');
+    if (reportForm) {
+        reportForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const reason = document.getElementById('reportReason').value;
+            const description = document.getElementById('reportDescription').value;
+
+            console.log('Form submitted - reportType:', reportType, 'reportId:', reportId);
+
+            if (!reason) {
+                alert('Veuillez sélectionner une raison');
+                return;
+            }
+
+            if (!reportType || !reportId) {
+                alert('Erreur: Type de signalement ou ID manquant');
+                console.error('Missing reportType or reportId:', reportType, reportId);
+                return;
+            }
+
+            try {
+                let endpoint;
+                if (reportType === 'article') {
+                    endpoint = `/api/reports/article/{{ article.id }}`;
+                } else if (reportType === 'comment') {
+                    endpoint = `/api/reports/comment/${reportId}`;
+                } else {
+                    throw new Error('Invalid report type: ' + reportType);
+                }
+
+                console.log('Sending report to:', endpoint);
+
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        reason: reason,
+                        description: description
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('✅ Signalement envoyé avec succès. Merci de votre contribution !');
+                    closeReportModal();
+                } else {
+                    alert('❌ ' + (data.error || 'Erreur lors du signalement'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Erreur lors de l\'envoi du signalement: ' + error.message);
+            }
+        });
+    }
+</script>
+
 {% endblock %}

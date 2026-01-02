@@ -32,4 +32,29 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $this->getEntityManager()->persist($user);
         $this->getEntityManager()->flush();
     }
+
+    public function findBySearchTerm(string $term)
+    {
+        return $this->createQueryBuilder('u')
+            ->where('u.name LIKE :term OR u.email LIKE :term OR u.firstName LIKE :term OR u.lastName LIKE :term')
+            ->setParameter('term', '%' . $term . '%')
+            ->orderBy('u.id', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findByRole(string $role)
+    {
+        // Get all users and filter by role in PHP since DQL doesn't support JSON_CONTAINS
+        $allUsers = $this->findAll();
+        $result = [];
+        
+        foreach ($allUsers as $user) {
+            if (in_array($role, $user->getRoles())) {
+                $result[] = $user;
+            }
+        }
+        
+        return $result;
+    }
 }

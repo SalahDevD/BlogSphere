@@ -12,6 +12,7 @@
         padding: 3rem 2rem;
         position: relative;
         overflow: hidden;
+        background: linear-gradient(135deg, var(--cream-light) 0%, var(--gray-50) 50%, var(--cream) 100%);
     }
     
     .auth-container::before {
@@ -21,33 +22,33 @@
         left: -15%;
         width: 500px;
         height: 500px;
-        background: radial-gradient(circle, rgba(255, 107, 53, 0.08) 0%, transparent 70%);
+        background: radial-gradient(circle, rgba(212, 165, 116, 0.1) 0%, transparent 70%);
         border-radius: 50%;
         z-index: -1;
     }
     
-    .orange-accent {
-        position: absolute;
-        background: var(--orange-primary);
-        border-radius: 20px;
-        opacity: 0.1;
-        z-index: -1;
-    }
-    
     .accent-1 {
+        position: absolute;
         width: 150px;
         height: 150px;
         bottom: 10%;
         left: 5%;
+        background: radial-gradient(circle, rgba(212, 165, 116, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
         animation: float 8s ease-in-out infinite;
+        z-index: -1;
     }
     
     .accent-2 {
+        position: absolute;
         width: 100px;
         height: 100px;
         top: 15%;
         right: 10%;
+        background: radial-gradient(circle, rgba(201, 169, 97, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
         animation: float 6s ease-in-out infinite reverse;
+        z-index: -1;
     }
     
     @keyframes float {
@@ -61,22 +62,11 @@
         padding: 3rem;
         max-width: 520px;
         width: 100%;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
-        border: 1px solid var(--gray-200);
+        box-shadow: 0 15px 50px rgba(139, 90, 60, 0.15);
+        border: 2px solid var(--beige-light);
         animation: fadeInUp 0.6s ease;
         position: relative;
         z-index: 1;
-    }
-    
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
     }
     
     .auth-header {
@@ -85,14 +75,18 @@
     }
     
     .auth-header h1 {
-        font-size: 2rem;
+        font-family: 'Playfair Display', serif;
+        font-size: 2.2rem;
         font-weight: 900;
-        color: var(--gray-900);
+        background: linear-gradient(135deg, var(--brown-primary) 0%, var(--gold) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
         margin-bottom: 0.5rem;
     }
     
     .auth-header p {
-        color: var(--gray-600);
+        color: var(--gray-700);
         font-size: 1rem;
     }
     
@@ -118,14 +112,14 @@
     
     .alert-danger {
         background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-        color: #991b1b;
-        border: 2px solid #ef4444;
+        color: var(--dark-brown);
+        border: 2px solid var(--brown-primary);
     }
     
     .alert-warning {
         background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-        color: #92400e;
-        border: 2px solid #f59e0b;
+        color: var(--dark-brown);
+        border: 2px solid var(--gold);
     }
     
     .alert-info {
@@ -335,6 +329,32 @@
 
         {{ form_start(registrationForm, {'attr': {'novalidate': 'novalidate'}}) }}
             <div class="form-group">
+                <label for="registration_firstName" class="form-label">
+                    Prénom <span style="color: #ef4444;">*</span>
+                </label>
+                {{ form_widget(registrationForm.firstName, {
+                    'attr': {
+                        'class': 'form-control' ~ (registrationForm.firstName.vars.errors|length > 0 ? ' is-invalid' : ''),
+                        'placeholder': 'Jean'
+                    }
+                }) }}
+                {{ form_errors(registrationForm.firstName) }}
+            </div>
+
+            <div class="form-group">
+                <label for="registration_lastName" class="form-label">
+                    Nom de famille <span style="color: #ef4444;">*</span>
+                </label>
+                {{ form_widget(registrationForm.lastName, {
+                    'attr': {
+                        'class': 'form-control' ~ (registrationForm.lastName.vars.errors|length > 0 ? ' is-invalid' : ''),
+                        'placeholder': 'Dupont'
+                    }
+                }) }}
+                {{ form_errors(registrationForm.lastName) }}
+            </div>
+
+            <div class="form-group">
                 <label for="registration_email" class="form-label">
                     Email <span style="color: #ef4444;">*</span>
                 </label>
@@ -345,19 +365,6 @@
                     }
                 }) }}
                 {{ form_errors(registrationForm.email) }}
-            </div>
-
-            <div class="form-group">
-                <label for="registration_name" class="form-label">
-                    Nom complet <span style="color: #ef4444;">*</span>
-                </label>
-                {{ form_widget(registrationForm.name, {
-                    'attr': {
-                        'class': 'form-control' ~ (registrationForm.name.vars.errors|length > 0 ? ' is-invalid' : ''),
-                        'placeholder': 'Jean Dupont'
-                    }
-                }) }}
-                {{ form_errors(registrationForm.name) }}
             </div>
 
             <div class="form-group">

@@ -25,8 +25,21 @@ class SupportMessage
     #[ORM\Column(type: 'text')]
     private ?string $content = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $subject = null;
+
+    #[ORM\Column(length: 50, nullable: true)]
+    private ?string $messageType = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $image = null;
+
     #[ORM\Column]
     private bool $isRead = false;
+
+    #[ORM\ManyToOne(targetEntity: SupportMessage::class)]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    private ?SupportMessage $parentMessage = null;
 
     #[ORM\Column(type: 'datetime')]
     private ?\DateTime $createdAt = null;
@@ -74,6 +87,28 @@ class SupportMessage
         return $this;
     }
 
+    public function getSubject(): ?string
+    {
+        return $this->subject;
+    }
+
+    public function setSubject(?string $subject): self
+    {
+        $this->subject = $subject;
+        return $this;
+    }
+
+    public function getMessageType(): ?string
+    {
+        return $this->messageType;
+    }
+
+    public function setMessageType(?string $messageType): self
+    {
+        $this->messageType = $messageType;
+        return $this;
+    }
+
     public function isRead(): bool
     {
         return $this->isRead;
@@ -93,6 +128,28 @@ class SupportMessage
     public function setCreatedAt(\DateTime $createdAt): self
     {
         $this->createdAt = $createdAt;
+        return $this;
+    }
+
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+
+    public function setImage(?string $image): self
+    {
+        $this->image = $image;
+        return $this;
+    }
+
+    public function getParentMessage(): ?SupportMessage
+    {
+        return $this->parentMessage;
+    }
+
+    public function setParentMessage(?SupportMessage $parentMessage): self
+    {
+        $this->parentMessage = $parentMessage;
         return $this;
     }
 }

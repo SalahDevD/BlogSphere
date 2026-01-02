@@ -6,6 +6,11 @@
 <div style="max-width: 800px; margin: 3rem auto; padding: 2rem; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
     <h1 style="font-size: 2rem; font-weight: 900; color: #111827; margin-bottom: 2rem;">✍️ Créer un article</h1>
 
+    <div style="padding: 1rem; background: #FFF3E0; border-left: 4px solid #FF6B35; border-radius: 4px; margin-bottom: 1.5rem; color: #E65100;">
+        <strong>ℹ️ Information importante :</strong><br/>
+        Votre premier article sera soumis à validation par un superviseur. Une fois approuvé, vous pourrez publier vos prochains articles directement.
+    </div>
+
     {% for label, messages in app.flashes %}
         {% for message in messages %}
             <div style="padding: 1rem; background: {% if label == 'success' %}#e8f5e9{% else %}#ffebee{% endif %}; border-left: 4px solid {% if label == 'success' %}#388e3c{% else %}#d32f2f{% endif %}; border-radius: 4px; margin-bottom: 1rem; color: {% if label == 'success' %}#2e7d32{% else %}#c62828{% endif %};">

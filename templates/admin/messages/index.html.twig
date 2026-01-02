@@ -1,0 +1,187 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Messages des Clients - Admin{% endblock %}
+
+{% block body %}
+<div style="background: #f9fafb; min-height: 100vh; padding: 3rem 0;">
+    <div style="max-width: 1400px; margin: 0 auto; padding: 0 2rem;">
+        <div style="display: flex; gap: 2rem; margin-bottom: 2rem; align-items: center;">
+            <h1 style="font-size: 2.5rem; font-weight: 900; color: #111827; margin: 0;">📨 Messages des Clients</h1>
+            {% if conversations is defined and conversations|length > 0 %}
+                <span style="background: #FFE5DC; color: #FF6B35; padding: 0.5rem 1rem; border-radius: 20px; font-weight: 600;">{{ conversations|length }} conversation(s)</span>
+            {% endif %}
+        </div>
+
+        {% if conversations is defined and conversations|length > 0 %}
+            <div style="display: grid; grid-template-columns: 350px 1fr; gap: 2rem;">
+                {# Sidebar: Liste des conversations #}
+                <div style="background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden; height: fit-content;">
+                    <div style="padding: 1.5rem; border-bottom: 2px solid #e5e7eb; background: linear-gradient(135deg, #FF6B35, #E85A2A); color: white;">
+                        <h2 style="font-size: 1.1rem; font-weight: 700; margin: 0;">💬 Conversations</h2>
+                    </div>
+
+                    <div style="max-height: 600px; overflow-y: auto;">
+                        {% for senderId, conversation in conversations %}
+                            <div class="conversation-item" data-client-id="{{ senderId }}" style="padding: 1rem; border-bottom: 1px solid #e5e7eb; cursor: pointer; transition: all 0.3s; background: white;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='white'" onclick="selectConversation({{ senderId }})">
+                                <div style="display: flex; gap: 0.75rem; margin-bottom: 0.5rem;">
+                                    <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #FF6B35, #E85A2A); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; flex-shrink: 0;">
+                                        {{ conversation.sender.name|slice(0, 1)|upper }}
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <p style="margin: 0; font-weight: 600; color: #111827;">{{ conversation.sender.name }}</p>
+                                        <p style="margin: 0; font-size: 0.85rem; color: #6b5563;">{{ conversation.sender.email }}</p>
+                                    </div>
+                                    {% if conversation.unreadCount > 0 %}
+                                        <span style="background: #ef4444; color: white; padding: 0.25rem 0.5rem; border-radius: 50%; font-size: 0.75rem; font-weight: 700; min-width: 24px; text-align: center;">{{ conversation.unreadCount }}</span>
+                                    {% endif %}
+                                </div>
+                                <p style="margin: 0; font-size: 0.9rem; color: #6b5563; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ conversation.lastMessage.content|striptags|slice(0, 50) }}...</p>
+                                <p style="margin: 0.25rem 0 0; font-size: 0.75rem; color: #9ca3af;">{{ conversation.lastMessage.createdAt|date('d/m/Y H:i') }}</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                {# Main: Conversation actuelle #}
+                <div id="conversationContainer" style="background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); display: flex; flex-direction: column; height: 600px;">
+                    <div style="padding: 1.5rem; border-bottom: 2px solid #e5e7eb; background: linear-gradient(135deg, #FF6B35, #E85A2A); color: white;">
+                        <h2 id="conversationTitle" style="font-size: 1.25rem; font-weight: 700; margin: 0;">Sélectionnez une conversation</h2>
+                    </div>
+
+                    <div id="messagesContainer" style="flex: 1; padding: 1.5rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; background: #f9fafb;">
+                        <!-- Messages will be loaded here -->
+                    </div>
+
+                    <div id="replyForm" style="padding: 1rem; border-top: 2px solid #e5e7eb; background: white; display: none;">
+                        <form onsubmit="sendReply(event)" style="display: flex; gap: 0.5rem;">
+                            <input type="text" id="replyInput" placeholder="Votre réponse..." style="flex: 1; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px; font-family: inherit;" required>
+                            <button type="submit" style="padding: 0.75rem 1.5rem; background: linear-gradient(135deg, #FF6B35, #E85A2A); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Envoyer</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div style="background: white; padding: 4rem; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                <p style="font-size: 4rem; margin-bottom: 1rem;">📭</p>
+                <h2 style="font-size: 1.5rem; font-weight: 700; color: #111827; margin-bottom: 0.5rem;">Aucun message</h2>
+                <p style="color: #6b5563;">Les clients n'ont pas encore envoyé de messages via le chat support.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    let selectedClientId = null;
+
+    function selectConversation(clientId) {
+        selectedClientId = clientId;
+        document.querySelectorAll('.conversation-item').forEach(item => {
+            item.style.background = item.getAttribute('data-client-id') == clientId ? '#e5e7eb' : 'white';
+        });
+
+        const clientName = document.querySelector(`.conversation-item[data-client-id="${clientId}"] p`).textContent;
+        document.getElementById('conversationTitle').textContent = `💬 Conversation avec ${clientName}`;
+        document.getElementById('replyForm').style.display = 'flex';
+
+        // Charger les messages
+        loadMessages(clientId);
+    }
+
+    function loadMessages(clientId) {
+        fetch(`/admin/messages/api/messages/${clientId}`)
+            .then(response => response.json())
+            .then(messages => {
+                const container = document.getElementById('messagesContainer');
+                container.innerHTML = '';
+
+                if (messages.length === 0) {
+                    container.innerHTML = '<p style="color: #6b5563; text-align: center;">Aucun message pour cette conversation.</p>';
+                    return;
+                }
+
+                messages.forEach(message => {
+                    const isFromAdmin = message.isFromAdmin;
+                    const messageDiv = document.createElement('div');
+                    messageDiv.style.cssText = isFromAdmin ? 
+                        'display: flex; justify-content: flex-start; gap: 0.5rem;' :
+                        'display: flex; justify-content: flex-end; gap: 0.5rem;';
+                    
+                    const bubble = document.createElement('div');
+                    bubble.style.cssText = isFromAdmin ?
+                        'background: white; border: 1px solid #e5e7eb; color: #111827; padding: 0.75rem 1rem; border-radius: 12px; max-width: 70%; word-wrap: break-word;' :
+                        'background: linear-gradient(135deg, #FF6B35, #E85A2A); color: white; padding: 0.75rem 1rem; border-radius: 12px; max-width: 70%; word-wrap: break-word;';
+                    
+                    let imageHtml = '';
+                    if (message.image) {
+                        imageHtml = `<img src="/uploads/support/${message.image}" alt="Image" style="max-width: 100%; max-height: 300px; border-radius: 8px; margin-bottom: 0.5rem;">`;
+                    }
+                    
+                    bubble.innerHTML = `
+                        ${imageHtml}
+                        <div style="font-size: 0.9rem; word-wrap: break-word;">${escapeHtml(message.content)}</div>
+                        <div style="font-size: 0.75rem; opacity: 0.7; margin-top: 0.5rem;">${message.createdAtTime}</div>
+                        ${isFromAdmin ? '<div style="font-size: 0.75rem; opacity: 0.7;">Admin</div>' : ''}
+                    `;
+                    
+                    messageDiv.appendChild(bubble);
+                    container.appendChild(messageDiv);
+                });
+
+                container.scrollTop = container.scrollHeight;
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    function sendReply(event) {
+        event.preventDefault();
+        const input = document.getElementById('replyInput');
+        const content = input.value.trim();
+
+        if (!content || !selectedClientId) return;
+
+        fetch(`/admin/messages/reply/${selectedClientId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ content })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                input.value = '';
+                loadMessages(selectedClientId);
+            } else {
+                alert('Erreur lors de l\'envoi de la réponse');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Erreur lors de l\'envoi de la réponse');
+        });
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Charger la première conversation au démarrage
+    window.addEventListener('load', () => {
+        const firstItem = document.querySelector('.conversation-item');
+        if (firstItem) {
+            firstItem.click();
+        }
+    });
+
+    // Auto-refresh toutes les 3 secondes
+    setInterval(() => {
+        if (selectedClientId) {
+            loadMessages(selectedClientId);
+        }
+    }, 3000);
+</script>
+
+{% endblock %}

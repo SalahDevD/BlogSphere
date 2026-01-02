@@ -2,104 +2,143 @@
 
 namespace App\Controller;
 
-use App\Entity\SupportMessage;
-use App\Entity\User;
-use App\Repository\SupportMessageRepository;
+use App\Entity\ChatMessage;
+use App\Repository\ChatMessageRepository;
+use App\Service\ChatbotService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Doctrine\ORM\EntityManagerInterface;
+use Throwable;
 
-#[Route('/api/support', name: 'api_support')]
-#[IsGranted('ROLE_USER')]
+#[Route('/api/chat', name: 'api_chat')]
 class SupportController extends AbstractController
 {
-    #[Route('/messages', name: 'support_messages_list', methods: ['GET'])]
-    public function listMessages(SupportMessageRepository $messageRepository): Response
+    #[Route('/test', name: 'test_chat', methods: ['GET'])]
+    public function testChat(): JsonResponse
+    {
+        try {
+            $service = new ChatbotService();
+            $response = $service->generateResponse('test');
+            return new JsonResponse([
+                'status' => 'ok',
+                'message' => $response
+            ]);
+        } catch (Throwable $e) {
+            return new JsonResponse([
+                'status' => 'error',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    #[Route('/message/send', name: 'send_message', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function sendMessage(
+        Request $request,
+        EntityManagerInterface $em,
+        ChatbotService $chatbotService,
+        ChatMessageRepository $chatRepository
+    ): JsonResponse {
+        try {
+            // Récupérer l'utilisateur
+            $user = $this->getUser();
+            
+            if (!$user) {
+                return new JsonResponse(['error' => 'Utilisateur non authentifié'], 401);
+            }
+            
+            // Récupérer le contenu du message
+            $userMessage = null;
+            $contentType = $request->headers->get('Content-Type', '');
+            
+            if (strpos($contentType, 'application/json') !== false) {
+                $data = json_decode($request->getContent(), true);
+                $userMessage = $data['content'] ?? null;
+            } else {
+                $userMessage = $request->request->get('content');
+            }
+
+            if (!$userMessage || empty(trim($userMessage))) {
+                return new JsonResponse(['error' => 'Le contenu du message est requis'], 400);
+            }
+
+            // Générer la réponse du chatbot
+            $botResponse = 'Désolé, une erreur s\'est produite.';
+            try {
+                $botResponse = $chatbotService->generateResponse($userMessage);
+            } catch (Throwable $e) {
+                error_log('ChatbotService Error: ' . $e->getMessage());
+            }
+
+            // Enregistrer la conversation
+            try {
+                $chatMsg = new ChatMessage();
+                $chatMsg->setUser($user);
+                $chatMsg->setUserMessage($userMessage);
+                $chatMsg->setBotResponse($botResponse);
+
+                $em->persist($chatMsg);
+                $em->flush();
+
+                return new JsonResponse([
+                    'success' => true,
+                    'userMessage' => $userMessage,
+                    'botResponse' => $botResponse,
+                    'id' => $chatMsg->getId()
+                ], 201);
+            } catch (Throwable $e) {
+                error_log('Database Error: ' . $e->getMessage());
+                // Retourner le message du chatbot même si la sauvegarde échoue
+                return new JsonResponse([
+                    'success' => true,
+                    'userMessage' => $userMessage,
+                    'botResponse' => $botResponse
+                ], 200);
+            }
+        } catch (Throwable $e) {
+            error_log('ChatBot Error: ' . $e->getMessage() . ' - ' . $e->getTraceAsString());
+            return new JsonResponse([
+                'error' => 'Erreur serveur',
+                'message' => 'Une erreur est survenue'
+            ], 500);
+        }
+    }
+
+    #[Route('/messages', name: 'get_messages', methods: ['GET'])]
+    #[IsGranted('ROLE_USER')]
+    public function getMessages(ChatMessageRepository $chatRepository): Response
     {
         $user = $this->getUser();
         
-        // Les utilisateurs voient uniquement leurs messages
-        // Les superviseurs voient tous les messages
-        if ($this->isGranted('ROLE_SUPERVISOR')) {
-            $messages = $messageRepository->findBy([], ['createdAt' => 'DESC']);
-        } else {
-            $messages = $messageRepository->findBy(['user' => $user], ['createdAt' => 'DESC']);
-        }
-        
-        $data = array_map(function($message) {
-            return [
-                'id' => $message->getId(),
-                'subject' => $message->getSubject(),
-                'message' => $message->getMessage(),
-                'status' => $message->getStatus(),
-                'response' => $message->getResponse(),
-                'userId' => $message->getUser()->getId(),
-                'userName' => $message->getUser()->getUsername(),
+        // Récupérer toutes les conversations du chatbot
+        $messages = $chatRepository->findByUser($user);
+
+        $data = [];
+        foreach ($messages as $message) {
+            // Message de l'utilisateur
+            $data[] = [
+                'id' => $message->getId() . '_user',
+                'content' => $message->getUserMessage(),
+                'isFromUser' => true,
                 'createdAt' => $message->getCreatedAt()->format('Y-m-d H:i:s'),
-                'respondedAt' => $message->getRespondedAt()?->format('Y-m-d H:i:s')
+                'createdAtTime' => $message->getCreatedAt()->format('H:i'),
             ];
-        }, $messages);
-        
+            
+            // Réponse du chatbot
+            $data[] = [
+                'id' => $message->getId() . '_bot',
+                'content' => $message->getBotResponse(),
+                'isFromUser' => false,
+                'createdAt' => $message->getCreatedAt()->format('Y-m-d H:i:s'),
+                'createdAtTime' => $message->getCreatedAt()->format('H:i'),
+            ];
+        }
+
         return $this->json($data);
     }
-    
-    #[Route('/message/send', name: 'support_send_message', methods: ['POST'])]
-    public function sendMessage(
-        Request $request,
-        EntityManagerInterface $em
-    ): Response {
-        $user = $this->getUser();
-        $data = json_decode($request->getContent(), true);
-        
-        if (!isset($data['subject']) || !isset($data['message'])) {
-            return $this->json(['error' => 'Sujet et message requis'], 400);
-        }
-        
-        $supportMessage = new SupportMessage();
-        $supportMessage->setUser($user);
-        $supportMessage->setSubject($data['subject']);
-        $supportMessage->setMessage($data['message']);
-        $supportMessage->setStatus('PENDING');
-        $supportMessage->setCreatedAt(new \DateTime());
-        
-        $em->persist($supportMessage);
-        $em->flush();
-        
-        return $this->json([
-            'message' => 'Message envoyé au support',
-            'id' => $supportMessage->getId()
-        ], 201);
-    }
-    
-    #[Route('/message/{id}', name: 'support_view_message', methods: ['GET'])]
-    public function viewMessage(
-        int $id,
-        SupportMessageRepository $messageRepository
-    ): Response {
-        $user = $this->getUser();
-        $message = $messageRepository->find($id);
-        
-        if (!$message) {
-            return $this->json(['error' => 'Message non trouvé'], 404);
-        }
-        
-        // Vérifier les permissions
-        if ($message->getUser() !== $user && !$this->isGranted('ROLE_SUPERVISOR')) {
-            return $this->json(['error' => 'Non autorisé'], 403);
-        }
-        
-        return $this->json([
-            'id' => $message->getId(),
-            'subject' => $message->getSubject(),
-            'message' => $message->getMessage(),
-            'status' => $message->getStatus(),
-            'response' => $message->getResponse(),
-            'userName' => $message->getUser()->getUsername(),
-            'createdAt' => $message->getCreatedAt()->format('Y-m-d H:i:s'),
-            'respondedAt' => $message->getRespondedAt()?->format('Y-m-d H:i:s')
-        ]);
-    }
 }
+
