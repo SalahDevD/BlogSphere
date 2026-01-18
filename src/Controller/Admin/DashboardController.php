@@ -6,6 +6,7 @@ use App\Repository\ArticleRepository;
 use App\Repository\UserRepository;
 use App\Repository\ReportRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -49,5 +50,39 @@ class DashboardController extends AbstractController
             'pendingReports'    => $pendingReports,
             'pendingComments'   => $pendingComments,
         ]);
+    }
+
+    #[Route('/search', name: 'search', methods: ['GET'])]
+    public function search(
+        Request $request,
+        ArticleRepository $articleRepository,
+        UserRepository $userRepository
+    ): Response {
+        $query = $request->query->get('q', '');
+        $results = [];
+
+        if (!empty($query)) {
+            // Search articles
+            $articles = $articleRepository->createQueryBuilder('a')
+                ->where('a.title LIKE :search OR a.content LIKE :search')
+                ->setParameter('search', '%' . $query . '%')
+                ->getQuery()
+                ->getResult();
+
+            // Search users
+            $users = $userRepository->createQueryBuilder('u')
+                ->where('u.firstName LIKE :search OR u.lastName LIKE :search OR u.email LIKE :search')
+                ->setParameter('search', '%' . $query . '%')
+                ->getQuery()
+                ->getResult();
+
+            $results = [
+                'articles' => $articles,
+                'users' => $users,
+                'query' => $query,
+            ];
+        }
+
+        return $this->render('admin/search_results.html.twig', $results);
     }
 }

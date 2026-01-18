@@ -8,3 +8,42 @@
 /var/
 /vendor/
 ###< symfony/framework-bundle ###
+###> Environment files ###
+.env
+.env.dev
+.env.local
+.env.*.local
+###< Environment files ###
+
+###> IDE & OS ###
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+*.code-workspace
+###< IDE & OS ###
+
+###> Node modules & npm ###
+node_modules/
+npm-debug.log
+yarn-error.log
+###< Node modules & npm ###
+
+###> Build & Cache ###
+.cache/
+.build/
+dist/
+build/
+*.min.js
+*.min.css
+###< Build & Cache ###
+
+###> OS Specific ###
+.env.*.local
+.env.local
+!.env.example
+!.env.test
+###< OS Specific ###

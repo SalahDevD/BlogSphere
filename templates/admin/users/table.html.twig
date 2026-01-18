@@ -1,0 +1,55 @@
+{% if users|length > 0 %}
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Email</th>
+                    <th>Rôles</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                    <tr>
+                        <td>
+                            <strong>{{ user.name }}</strong>
+                        </td>
+                        <td>{{ user.email }}</td>
+                        <td>
+                            {% set roleLabels = {
+                                'ROLE_USER': '👤 Utilisateur',
+                                'ROLE_EDITOR': '✏️ Éditeur',
+                                'ROLE_SUPERVISOR': '👀 Superviseur',
+                                'ROLE_ADMIN': '🔐 Administrateur'
+                            } %}
+                            {% for role in user.roles %}
+                                {% set roleDisplay = role|replace({'ROLE_': ''}) %}
+                                <span class="role-badge role-{{ roleDisplay|lower }}" style="display: inline-block; margin-right: 0.5rem; margin-bottom: 0.5rem;">
+                                    {{ roleLabels[role] ?? roleDisplay }}
+                                </span>
+                            {% endfor %}
+                        </td>
+                        <td>
+                            <div class="actions">
+                                <a href="{{ path('admin_users_edit', {id: user.id}) }}" class="btn btn-edit">Modifier</a>
+                                <form method="POST" action="{{ path('admin_users_delete', {id: user.id}) }}" style="display: inline;" onsubmit="return confirm('Êtes-vous sûr ?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
+                                    <button type="submit" class="btn btn-delete">Supprimer</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="table-wrapper">
+        <div class="empty-state">
+            <div class="empty-state-emoji">👤</div>
+            <h2>Aucun utilisateur trouvé</h2>
+            <p style="color: var(--gray-600);">Modifiez vos filtres pour voir les utilisateurs</p>
+        </div>
+    </div>
+{% endif %}

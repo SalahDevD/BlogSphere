@@ -1,0 +1,22 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Confirmer la suppression{% endblock %}
+
+{% block content %}
+    <div class="container mt-5">
+        <div class="alert alert-warning" role="alert">
+            <h4 class="alert-heading">Confirmer la suppression</h4>
+            <p>Êtes-vous sûr de vouloir supprimer l'utilisateur <strong>{{ user.name }}</strong> ({{ user.email }}) ?</p>
+            <hr>
+            <p class="mb-0">Cette action est irréversible. Tous les messages de support où cet utilisateur est le destinataire seront conservés avec un destinataire vide.</p>
+        </div>
+
+        <div class="mt-4">
+            <form method="POST" action="{{ path('admin_users_delete', {id: user.id}) }}" style="display: inline;">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
+                <button type="submit" class="btn btn-danger">Supprimer</button>
+            </form>
+            <a href="{{ path('admin_users_index') }}" class="btn btn-secondary">Annuler</a>
+        </div>
+    </div>
+{% endblock %}

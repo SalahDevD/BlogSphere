@@ -2,6 +2,10 @@
 
 {% block title %}Articles - {{ tag.name }}{% endblock %}
 
+{% block stylesheets %}
+<link rel="stylesheet" href="{{ asset('css/tags.css') }}">
+{% endblock %}
+
 {% block body %}
 <h1 style="color: #8b4513; margin-bottom: 2rem;">Articles avec le tag : {{ tag.name }}</h1>
 

@@ -3,387 +3,222 @@
 {% block title %}À Propos - BlogSphere{% endblock %}
 
 {% block stylesheets %}
-<style>
-    :root {
-        --orange-primary: #FF6B35;
-        --orange-dark: #E85A2A;
-        --orange-light: #FFE5DC;
-        --gray-900: #111827;
-        --gray-700: #374151;
-        --gray-600: #4b5563;
-        --gray-200: #e5e7eb;
-        --gray-50: #f9fafb;
-        --white: #ffffff;
-    }
-
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        color: var(--gray-700);
-        line-height: 1.6;
-    }
-
-    .about-hero {
-        background: linear-gradient(135deg, var(--orange-primary), var(--orange-dark));
-        color: var(--white);
-        padding: 6rem 2rem;
-        text-align: center;
-        min-height: 500px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .about-hero h1 {
-        font-size: 3rem;
-        font-weight: 900;
-        margin-bottom: 1rem;
-    }
-
-    .about-hero p {
-        font-size: 1.3rem;
-        opacity: 0.95;
-        max-width: 600px;
-    }
-
-    .container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 2rem;
-    }
-
-    .about-section {
-        padding: 4rem 0;
-    }
-
-    .about-section h2 {
-        font-size: 2.5rem;
-        color: var(--gray-900);
-        margin-bottom: 2rem;
-        position: relative;
-        padding-bottom: 1rem;
-    }
-
-    .about-section h2::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 60px;
-        height: 4px;
-        background: linear-gradient(135deg, var(--orange-primary), var(--orange-dark));
-    }
-
-    .about-content {
-        font-size: 1.1rem;
-        line-height: 1.8;
-        color: var(--gray-600);
-    }
-
-    .about-content p {
-        margin-bottom: 1.5rem;
-    }
-
-    .features-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 2rem;
-        margin-top: 3rem;
-    }
-
-    .feature-card {
-        background: var(--white);
-        border-radius: 12px;
-        padding: 2rem;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        text-align: center;
-        transition: all 0.3s ease;
-        border-top: 4px solid var(--orange-primary);
-    }
-
-    .feature-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
-    }
-
-    .feature-icon {
-        font-size: 2.5rem;
-        margin-bottom: 1rem;
-    }
-
-    .feature-card h3 {
-        color: var(--gray-900);
-        margin-bottom: 1rem;
-        font-size: 1.3rem;
-    }
-
-    .feature-card p {
-        color: var(--gray-600);
-        font-size: 0.95rem;
-    }
-
-    .values-section {
-        background: var(--gray-50);
-        padding: 4rem 0;
-    }
-
-    .values-list {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 2rem;
-        margin-top: 3rem;
-    }
-
-    .value-item {
-        padding: 1.5rem;
-        background: var(--white);
-        border-radius: 8px;
-        border-left: 4px solid var(--orange-primary);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    }
-
-    .value-item h4 {
-        color: var(--orange-primary);
-        font-size: 1.2rem;
-        margin-bottom: 0.5rem;
-    }
-
-    .value-item p {
-        color: var(--gray-600);
-        font-size: 0.95rem;
-    }
-
-    .cta-section {
-        text-align: center;
-        padding: 3rem 2rem;
-        background: linear-gradient(135deg, rgba(255, 107, 53, 0.1), rgba(232, 90, 42, 0.1));
-        border-radius: 12px;
-        margin-top: 4rem;
-    }
-
-    .cta-section h3 {
-        color: var(--gray-900);
-        font-size: 1.8rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .cta-buttons {
-        display: flex;
-        gap: 1rem;
-        justify-content: center;
-        flex-wrap: wrap;
-    }
-
-    .btn {
-        padding: 0.75rem 2rem;
-        border-radius: 8px;
-        font-weight: 600;
-        text-decoration: none;
-        cursor: pointer;
-        border: none;
-        transition: all 0.3s ease;
-        font-size: 1rem;
-    }
-
-    .btn-primary {
-        background: linear-gradient(135deg, var(--orange-primary), var(--orange-dark));
-        color: var(--white);
-    }
-
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
-    }
-
-    .btn-secondary {
-        background: transparent;
-        color: var(--orange-primary);
-        border: 2px solid var(--orange-primary);
-    }
-
-    .btn-secondary:hover {
-        background: var(--orange-light);
-    }
-
-    @media (max-width: 768px) {
-        .about-hero {
-            padding: 4rem 1rem;
-        }
-
-        .about-hero h1 {
-            font-size: 2rem;
-        }
-
-        .about-hero p {
-            font-size: 1rem;
-        }
-
-        .about-section h2 {
-            font-size: 2rem;
-        }
-
-        .cta-buttons {
-            flex-direction: column;
-        }
-
-        .btn {
-            width: 100%;
-        }
-    }
-</style>
+<link rel="stylesheet" href="{{ asset('css/about.css') }}">
 {% endblock %}
 
 {% block body %}
+
+{# Hero Section Moderne #}
 <section class="about-hero">
-    <h1>À Propos de BlogSphere</h1>
-    <p>Découvrez la plateforme de partage d'articles qui unit les passionnés du contenu</p>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+        <h1>Bienvenue sur BlogSphere</h1>
+        <p class="hero-subtitle">La plateforme collaborative qui unit les passionnés de contenu</p>
+        <div class="hero-stats">
+            <div class="stat-item">
+                <span class="stat-number">1000+</span>
+                <span class="stat-label">Articles</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">500+</span>
+                <span class="stat-label">Membres</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">10K+</span>
+                <span class="stat-label">Échanges</span>
+            </div>
+        </div>
+    </div>
 </section>
 
-<div class="container">
-    <section class="about-section">
-        <h2>Notre Mission</h2>
-        <div class="about-content">
-            <p>
-                BlogSphere est une plateforme communautaire dédiée au partage et à la discussion d'articles passionnants.
-                Notre mission est de créer un espace inclusif où chacun peut exprimer ses idées, partager ses connaissances
-                et se connecter avec d'autres personnes partageant les mêmes intérêts.
-            </p>
-            <p>
-                Nous croyons que la collaboration et le dialogue constructif sont essentiels pour l'avancement de la connaissance
-                collective. BlogSphere offre les outils nécessaires pour faire entendre votre voix.
-            </p>
+<div class="page-container">
+    
+    {# Mission Section #}
+    <section class="mission-section">
+        <div class="section-header">
+            <span class="section-badge">Notre Vision</span>
+            <h2>Notre Mission</h2>
+            <p class="section-subtitle">Créer un espace d'échange et de partage authentique</p>
+        </div>
+        
+        <div class="mission-content">
+            <div class="mission-card">
+                <div class="mission-icon">🎯</div>
+                <h3>Vision Claire</h3>
+                <p>
+                    BlogSphere est une plateforme communautaire dédiée au partage et à la discussion d'articles passionnants.
+                    Notre mission est de créer un espace inclusif où chacun peut exprimer ses idées et partager ses connaissances.
+                </p>
+            </div>
+            
+            <div class="mission-card">
+                <div class="mission-icon">🌟</div>
+                <h3>Valeur Ajoutée</h3>
+                <p>
+                    Nous croyons que la collaboration et le dialogue constructif sont essentiels pour l'avancement de la connaissance
+                    collective. BlogSphere offre les outils nécessaires pour faire entendre votre voix.
+                </p>
+            </div>
         </div>
     </section>
 
-    <section class="about-section">
-        <h2>Fonctionnalités Principales</h2>
+    {# Features Section #}
+    <section class="features-section">
+        <div class="section-header">
+            <span class="section-badge">Fonctionnalités</span>
+            <h2>Ce que nous offrons</h2>
+            <p class="section-subtitle">Des outils puissants pour une expérience enrichissante</p>
+        </div>
+        
         <div class="features-grid">
             <div class="feature-card">
                 <div class="feature-icon">📝</div>
                 <h3>Rédaction d'Articles</h3>
-                <p>
-                    Créez et publiez vos propres articles avec un éditeur intuitif et facile à utiliser.
-                </p>
+                <p>Créez et publiez vos propres articles avec un éditeur intuitif et facile à utiliser.</p>
             </div>
+            
             <div class="feature-card">
                 <div class="feature-icon">💬</div>
                 <h3>Discussions Enrichies</h3>
-                <p>
-                    Participez à des discussions approfondies en commentant les articles et en interagissant avec la communauté.
-                </p>
+                <p>Participez à des discussions approfondies en commentant les articles et en interagissant avec la communauté.</p>
             </div>
+            
             <div class="feature-card">
                 <div class="feature-icon">❤️</div>
                 <h3>Réactions & Engagement</h3>
-                <p>
-                    Exprimez votre appréciation avec des réactions variées et encouragez le contenu que vous aimez.
-                </p>
+                <p>Exprimez votre appréciation avec des réactions variées et encouragez le contenu que vous aimez.</p>
             </div>
+            
             <div class="feature-card">
                 <div class="feature-icon">🏷️</div>
                 <h3>Organisation par Tags</h3>
-                <p>
-                    Catégorisez votre contenu avec des tags pour une meilleure découverte et organisation.
-                </p>
+                <p>Catégorisez votre contenu avec des tags pour une meilleure découverte et organisation.</p>
             </div>
+            
             <div class="feature-card">
                 <div class="feature-icon">👤</div>
                 <h3>Profils Personnalisés</h3>
-                <p>
-                    Créez votre profil unique et mettez en avant votre expertise et vos intérêts.
-                </p>
+                <p>Créez votre profil unique et mettez en avant votre expertise et vos intérêts.</p>
             </div>
+            
             <div class="feature-card">
                 <div class="feature-icon">🛡️</div>
                 <h3>Communauté Sûre</h3>
-                <p>
-                    Nos superviseurs et administrateurs veillent à maintenir un environnement respectueux et constructif.
-                </p>
+                <p>Nos superviseurs et administrateurs veillent à maintenir un environnement respectueux et constructif.</p>
             </div>
         </div>
     </section>
 
+    {# Values Section #}
     <section class="values-section">
-        <div class="container">
+        <div class="section-header">
+            <span class="section-badge">Nos Principes</span>
             <h2>Nos Valeurs</h2>
-            <div class="values-list">
-                <div class="value-item">
-                    <h4>✨ Excellence</h4>
-                    <p>
-                        Nous nous engageons à fournir une plateforme de haute qualité avec une excellente expérience utilisateur.
-                    </p>
-                </div>
-                <div class="value-item">
-                    <h4>🤝 Inclusivité</h4>
-                    <p>
-                        Tout le monde est bienvenu. Nous valorisons la diversité des perspectives et des voix.
-                    </p>
-                </div>
-                <div class="value-item">
-                    <h4>🔒 Transparence</h4>
-                    <p>
-                        Nous croyons à la communication ouverte et à la transparence dans nos opérations.
-                    </p>
-                </div>
-                <div class="value-item">
-                    <h4>🌱 Croissance</h4>
-                    <p>
-                        Nous encourageons l'apprentissage continu et la croissance personnelle de notre communauté.
-                    </p>
-                </div>
-                <div class="value-item">
-                    <h4>💡 Innovation</h4>
-                    <p>
-                        Nous amélirons constamment notre plateforme pour mieux servir notre communauté.
-                    </p>
-                </div>
-                <div class="value-item">
-                    <h4>🎯 Responsabilité</h4>
-                    <p>
-                        Nous sommes responsables envers nos utilisateurs et envers la qualité du contenu.
-                    </p>
-                </div>
+            <p class="section-subtitle">Les piliers qui guident notre communauté</p>
+        </div>
+        
+        <div class="values-grid">
+            <div class="value-card">
+                <div class="value-icon">✨</div>
+                <h4>Excellence</h4>
+                <p>Une plateforme de haute qualité avec une excellente expérience utilisateur.</p>
+            </div>
+            
+            <div class="value-card">
+                <div class="value-icon">🤝</div>
+                <h4>Inclusivité</h4>
+                <p>Tout le monde est bienvenu. Nous valorisons la diversité des perspectives.</p>
+            </div>
+            
+            <div class="value-card">
+                <div class="value-icon">🔒</div>
+                <h4>Transparence</h4>
+                <p>Communication ouverte et transparence dans toutes nos opérations.</p>
+            </div>
+            
+            <div class="value-card">
+                <div class="value-icon">🌱</div>
+                <h4>Croissance</h4>
+                <p>Apprentissage continu et croissance personnelle de notre communauté.</p>
+            </div>
+            
+            <div class="value-card">
+                <div class="value-icon">💡</div>
+                <h4>Innovation</h4>
+                <p>Amélioration constante pour mieux servir notre communauté.</p>
+            </div>
+            
+            <div class="value-card">
+                <div class="value-icon">🎯</div>
+                <h4>Responsabilité</h4>
+                <p>Engagement envers nos utilisateurs et la qualité du contenu.</p>
             </div>
         </div>
     </section>
 
-    <section class="about-section">
-        <h2>Comment Ça Marche</h2>
-        <div class="about-content">
-            <p>
-                <strong>1. Inscription :</strong> Créez votre compte gratuitement pour accéder à toutes les fonctionnalités de BlogSphere.
-            </p>
-            <p>
-                <strong>2. Découverte :</strong> Parcourez la bibliothèque d'articles, explorez différentes catégories et tags,
-                et trouvez du contenu qui vous intéresse.
-            </p>
-            <p>
-                <strong>3. Participation :</strong> Commentez les articles, posez des questions et participez aux discussions
-                avec d'autres membres de la communauté.
-            </p>
-            <p>
-                <strong>4. Création :</strong> Partagez vos propres idées en écrivant et en publiant vos articles.
-                Contribuez à la richesse de notre plateforme.
-            </p>
-            <p>
-                <strong>5. Support :</strong> Si vous avez besoin d'aide ou souhaitez signaler un problème, contactez directement
-                notre équipe de support composée de superviseurs et d'administrateurs.
-            </p>
+    {# How It Works Section #}
+    <section class="how-section">
+        <div class="section-header">
+            <span class="section-badge">Guide</span>
+            <h2>Comment Ça Marche</h2>
+            <p class="section-subtitle">Rejoignez-nous en quelques étapes simples</p>
+        </div>
+        
+        <div class="steps-container">
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <h3>Inscription</h3>
+                <p>Créez votre compte gratuitement pour accéder à toutes les fonctionnalités de BlogSphere.</p>
+            </div>
+            
+            <div class="step-arrow">→</div>
+            
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <h3>Découverte</h3>
+                <p>Parcourez la bibliothèque d'articles et explorez différentes catégories qui vous intéressent.</p>
+            </div>
+            
+            <div class="step-arrow">→</div>
+            
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <h3>Participation</h3>
+                <p>Commentez, posez des questions et participez aux discussions avec la communauté.</p>
+            </div>
+            
+            <div class="step-arrow">→</div>
+            
+            <div class="step-card">
+                <div class="step-number">4</div>
+                <h3>Création</h3>
+                <p>Partagez vos propres idées en écrivant et en publiant vos articles.</p>
+            </div>
         </div>
     </section>
 
+    {# CTA Section #}
     <section class="cta-section">
-        <h3>Prêt à Rejoindre Notre Communauté ?</h3>
-        <div class="cta-buttons">
-            <a href="{{ path('app_home') }}" class="btn btn-primary">Découvrir les Articles</a>
-            <a href="{{ path('app_contact_support') }}" class="btn btn-secondary">Nous Contacter</a>
+        <div class="cta-card">
+            <h2>Prêt à Rejoindre Notre Communauté ?</h2>
+            <p>Découvrez des milliers d'articles et partagez vos propres idées dès aujourd'hui</p>
+            <div class="cta-buttons">
+                <a href="{{ path('app_home') }}" class="btn btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    </svg>
+                    Découvrir les Articles
+                </a>
+                <a href="{{ path('app_contact_support') }}" class="btn btn-outline">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    Nous Contacter
+                </a>
+            </div>
         </div>
     </section>
+
 </div>
+
 {% endblock %}

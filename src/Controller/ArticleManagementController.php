@@ -39,6 +39,7 @@ class ArticleManagementController extends AbstractController
         $article->setTitle($data['title']);
         $article->setContent($data['content']);
         $article->setAuthor($user);
+        $article->setAuthorName($user->getName());
         $article->setCreatedAt(new \DateTime());
         
         // Premier article = PENDING (nécessite validation superviseur)

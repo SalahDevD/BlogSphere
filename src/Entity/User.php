@@ -52,7 +52,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(options: ['default' => false])]
     private bool $firstArticleValidated = false;
 
-    #[ORM\OneToMany(mappedBy: 'author', targetEntity: Article::class, orphanRemoval: true)]
+    #[ORM\Column(options: ['default' => false])]
+    private bool $termsAccepted = false;
+
+    #[ORM\OneToMany(mappedBy: 'author', targetEntity: Article::class)]
     private Collection $articles;
 
     #[ORM\OneToMany(mappedBy: 'author', targetEntity: Comment::class, orphanRemoval: true)]
@@ -211,6 +214,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setFirstArticleValidated(bool $firstArticleValidated): self
     {
         $this->firstArticleValidated = $firstArticleValidated;
+        return $this;
+    }
+
+    public function isTermsAccepted(): bool
+    {
+        return $this->termsAccepted;
+    }
+
+    public function setTermsAccepted(bool $termsAccepted): self
+    {
+        $this->termsAccepted = $termsAccepted;
         return $this;
     }
 

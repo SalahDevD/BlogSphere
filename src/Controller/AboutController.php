@@ -13,4 +13,10 @@ class AboutController extends AbstractController
     {
         return $this->render('about/index.html.twig');
     }
+
+    #[Route('/terms', name: 'app_terms')]
+    public function terms(): Response
+    {
+        return $this->render('about/terms.html.twig');
+    }
 }

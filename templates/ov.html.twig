@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlogSphere</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/splash.css') }}">
+</head>
+<body>
+    <div class="splash-screen" id="splashScreen">
+        {# Vidéo d'introduction #}
+        <video id="splashVideo" class="splash-video" autoplay muted playsinline>
+            <source src="{{ asset('videos/ov.mp4') }}" type="video/mp4">
+            <source src="{{ asset('videos/ov.webm') }}" type="video/webm">
+            Votre navigateur ne supporte pas la vidéo.
+        </video>
+
+        {# Overlay gradient #}
+        <div class="splash-overlay"></div>
+
+        {# Contenu par-dessus la vidéo #}
+        <div class="splash-content">
+            <div class="splash-logo">
+                <div class="logo-tagline">Explorez, Partagez, Inspirez</div>
+            </div>
+            
+            {# Barre de progression #}
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+        </div>
+
+        {# Bouton Skip #}
+        <button class="skip-button" id="skipButton">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+            Passer l'intro
+        </button>
+
+        {# Loading indicator #}
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+        </div>
+    </div>
+
+    <script>
+        const splashScreen = document.getElementById('splashScreen');
+        const video = document.getElementById('splashVideo');
+        const progressBar = document.getElementById('progressBar');
+        const skipButton = document.getElementById('skipButton');
+        let videoDuration = 0;
+
+        // Quand la vidéo est chargée
+        video.addEventListener('loadedmetadata', function() {
+            videoDuration = video.duration;
+            console.log('Vidéo chargée, durée:', videoDuration);
+        });
+
+        // Mettre à jour la barre de progression
+        video.addEventListener('timeupdate', function() {
+            if (videoDuration > 0) {
+                const progress = (video.currentTime / videoDuration) * 100;
+                progressBar.style.width = progress + '%';
+            }
+        });
+
+        // Quand la vidéo est terminée
+        video.addEventListener('ended', function() {
+            console.log('Vidéo terminée');
+            goToHome();
+        });
+
+        // Gestion des erreurs de chargement
+        video.addEventListener('error', function(e) {
+            console.error('Erreur de chargement de la vidéo:', e);
+            // Si la vidéo ne charge pas, on passe directement à la page d'accueil après 2s
+            setTimeout(goToHome, 2000);
+        });
+
+        // Fonction pour aller à la page d'accueil
+        function goToHome() {
+            splashScreen.classList.add('fade-out');
+            setTimeout(function() {
+                window.location.href = '{{ path('app_home') }}';
+            }, 800);
+        }
+
+        // Bouton Skip
+        skipButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            goToHome();
+        });
+
+        // Afficher le bouton skip après 2 secondes
+        setTimeout(function() {
+            skipButton.classList.add('visible');
+        }, 2000);
+
+        // Démarrer la vidéo si elle n'a pas démarré automatiquement
+        video.play().catch(function(error) {
+            console.log('Autoplay bloqué, tentative de lecture manuelle');
+            // Si l'autoplay est bloqué, on affiche un message ou on skip automatiquement
+            skipButton.classList.add('visible');
+        });
+    </script>
+</body>
+</html>

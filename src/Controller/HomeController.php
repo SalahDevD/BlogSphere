@@ -9,7 +9,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class HomeController extends AbstractController
 {
-    #[Route('/', name: 'app_home')]
+    #[Route('/home', name: 'app_home')]
     public function index(ArticleRepository $articleRepository): Response
     {
         // 🎯 Articles les plus aimés pour le carousel (uniquement validés)

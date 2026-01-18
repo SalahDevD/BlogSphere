@@ -2,12 +2,21 @@
 
 {% block title %}{{ article.title }}{% endblock %}
 
+{% block stylesheets %}
+<link rel="stylesheet" href="{{ asset('css/article.css') }}">
+{% endblock %}
+
 {% block body %}
 <div style="background: #f9fafb; min-height: 100vh; padding: 3rem 0;">
     <div style="max-width: 900px; margin: 0 auto; padding: 0 2rem;">
-        <a href="{{ path('app_article_index') }}" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: #e5e7eb; color: #374151; text-decoration: none; border-radius: 8px; font-weight: 600; margin-bottom: 2rem; transition: all 0.3s;">← Tous les articles</a>
+        
+        {# Bouton retour #}
+        <a href="{{ path('app_article_index') }}" 
+           style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: #e5e7eb; color: #374151; text-decoration: none; border-radius: 8px; font-weight: 600; margin-bottom: 2rem; transition: all 0.3s;">
+            ← Tous les articles
+        </a>
 
-        {# Flash messages #}
+        {# Messages Flash #}
         {% for message in app.flashes('success') %}
             <div style="background: #d1fae5; padding: 1rem; border-radius: 8px; border-left: 4px solid #10b981; color: #065f46; margin-bottom: 1.5rem; font-weight: 600;">
                 {{ message }}
@@ -19,169 +28,181 @@
             </div>
         {% endfor %}
 
-        <div style="background: white; padding: 2rem; border-radius: 12px; margin-bottom: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+        {# Conteneur principal de l'article - TOUT DANS UN SEUL DIV #}
+        <div style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+            
+            {# Catégorie #}
             {% if article.category %}
-                <span style="display: inline-block; padding: 0.35rem 0.85rem; background: #FFE5DC; color: #FF6B35; border-radius: 20px; font-size: 0.85rem; font-weight: 600; margin-bottom: 1rem;">{{ article.category.name }}</span>
+                <span style="display: inline-block; padding: 0.35rem 0.85rem; background: #FFE5DC; color: #FF6B35; border-radius: 20px; font-size: 0.85rem; font-weight: 600; margin-bottom: 1rem; margin-right: 0.5rem;">
+                    {{ article.category.name }}
+                </span>
             {% endif %}
 
-            <h1 style="font-size: 2.5rem; font-weight: 900; color: #111827; margin-bottom: 1.5rem; line-height: 1.3;">{{ article.title }}</h1>
+            {# Tags #}
+            {% if article.tags|length > 0 %}
+                <div style="margin-bottom: 1rem;">
+                    {% for tag in article.tags %}
+                        <span style="display: inline-block; padding: 0.25rem 0.75rem; background: #E3F2FD; color: #1976D2; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-right: 0.5rem; margin-bottom: 0.5rem;">
+                            🏷️ {{ tag.name }}
+                        </span>
+                    {% endfor %}
+                </div>
+            {% endif %}
 
-            <div style="display: flex; gap: 2rem; padding-bottom: 1rem; border-bottom: 2px solid #e5e7eb; margin-bottom: 1rem; flex-wrap: wrap;">
+            {# Titre #}
+            <h1 style="font-size: 2.5rem; font-weight: 900; color: #111827; margin-bottom: 1.5rem; line-height: 1.3;">
+                {{ article.title }}
+            </h1>
+
+            {# Meta informations (Auteur + Date) #}
+            <div style="display: flex; gap: 2rem; padding-bottom: 1rem; border-bottom: 2px solid #e5e7eb; margin-bottom: 1.5rem; flex-wrap: wrap;">
                 <div>
-                    <p style="font-size: 0.85rem; color: #6b5563; font-weight: 600; text-transform: uppercase;">AUTEUR</p>
-                    <p style="font-size: 1rem; color: #111827; font-weight: 600;">{{ article.author.name }}</p>
+                    <p style="font-size: 0.85rem; color: #6b5563; font-weight: 600; text-transform: uppercase; margin: 0 0 0.25rem 0;">AUTEUR</p>
+                    <p style="font-size: 1rem; color: #111827; font-weight: 600; margin: 0;">{{ article.authorName ?? (article.author.name ?? '') }}</p>
                 </div>
                 <div>
-                    <p style="font-size: 0.85rem; color: #6b5563; font-weight: 600; text-transform: uppercase;">DATE</p>
-                    <p style="font-size: 1rem; color: #111827; font-weight: 600;">{{ article.createdAt|date('d M Y H:i') }}</p>
+                    <p style="font-size: 0.85rem; color: #6b5563; font-weight: 600; text-transform: uppercase; margin: 0 0 0.25rem 0;">DATE</p>
+                    <p style="font-size: 1rem; color: #111827; font-weight: 600; margin: 0;">{{ article.createdAt|date('d M Y H:i') }}</p>
                 </div>
             </div>
 
+            {# Boutons Modifier/Supprimer #}
             {% if is_granted('ROLE_USER') and article.author == app.user %}
-                <div style="display: flex; gap: 1rem;">
-                    <a href="{{ path('app_article_edit', {id: article.id}) }}" style="padding: 0.5rem 1rem; background: #667eea; color: white; text-decoration: none; border-radius: 8px; font-weight: 600;">✏️ Modifier</a>
+                <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
+                    <a href="{{ path('app_article_edit', {id: article.id}) }}" 
+                       style="padding: 0.5rem 1rem; background: #667eea; color: white; text-decoration: none; border-radius: 8px; font-weight: 600;">
+                        ✏️ Modifier
+                    </a>
                     <form method="POST" action="{{ path('app_article_delete', {id: article.id}) }}" style="display: inline; margin: 0;">
                         <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ article.id) }}">
-                        <button type="submit" onclick="return confirm('Supprimer ?')" style="padding: 0.5rem 1rem; background: #ef4444; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">🗑️ Supprimer</button>
+                        <button type="submit" 
+                                onclick="return confirm('Supprimer ?')" 
+                                style="padding: 0.5rem 1rem; background: #ef4444; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                            🗑️ Supprimer
+                        </button>
                     </form>
                 </div>
             {% endif %}
-        </div>
 
-        {% if article.image %}
-            <img src="{{ asset('uploads/articles/' ~ article.image) }}" alt="{{ article.title }}" style="width: 100%; max-height: 500px; object-fit: cover; border-radius: 12px; margin-bottom: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08);" onerror="this.style.display='none';">
-        {% endif %}
+            {# Image de l'article #}
+            {% if article.image %}
+                <img src="{{ asset('uploads/articles/' ~ article.image) }}" 
+                     alt="{{ article.title }}" 
+                     style="width: 100%; max-height: 500px; object-fit: cover; border-radius: 12px; margin-bottom: 2rem;" 
+                     onerror="this.style.display='none';">
+            {% endif %}
 
-        <div style="background: white; padding: 2rem; border-radius: 12px; margin-bottom: 2rem; font-size: 1.1rem; color: #374151; line-height: 1.8; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
-            {{ article.content|nl2br|raw }}
-        </div>
-
-        {# ============= SECTION RÉACTIONS ============= #}
-        <div style="background: white; padding: 2rem; border-radius: 12px; margin-bottom: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                <h3 style="font-size: 1.25rem; font-weight: 700; color: #111827;">Votre avis</h3>
-                
-                {% if is_granted('ROLE_USER') and article.author != app.user %}
-                    <button id="reportBtn" class="btn-report" style="padding: 0.5rem 1rem; background: #f97316; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9rem;">🚩 Signaler</button>
-                {% endif %}
+            {# Contenu de l'article #}
+            <div style="font-size: 1.1rem; color: #374151; line-height: 1.8; margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 2px solid #e5e7eb;">
+                {{ article.content|nl2br|raw }}
             </div>
-            
-            {% if is_granted('ROLE_USER') %}
-                <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
-                    {# 👍 Bouton Like #}
-                    <form method="POST"
-                          action="{{ path('app_reaction_article_like', { articleId: article.id }) }}"
-                          style="display: inline;">
-                        <button type="submit"
-                                style="
-                                    padding: 0.75rem 1.5rem;
-                                    border-radius: 8px;
-                                    cursor: pointer;
-                                    font-weight: 600;
-                                    transition: all 0.3s;
-                                    font-size: 1rem;
-                                    {% if userReaction and userReaction.isLike %}
-                                        background: #10b981;
-                                        border: 2px solid #10b981;
-                                        color: white;
-                                    {% else %}
-                                        background: white;
-                                        border: 2px solid #e5e7eb;
-                                        color: #374151;
-                                    {% endif %}
-                                ">
+
+            {# Section Réactions #}
+            <div style="margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 2px solid #e5e7eb;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h3 style="font-size: 1.25rem; font-weight: 700; color: #111827; margin: 0;">Votre avis</h3>
+                    
+                    {% if is_granted('ROLE_USER') and article.author != app.user %}
+                        <button id="reportBtn" 
+                                class="btn-report" 
+                                style="padding: 0.5rem 1rem; background: #f97316; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9rem;">
+                            🚩 Signaler
+                        </button>
+                    {% endif %}
+                </div>
+                
+                {% if is_granted('ROLE_USER') %}
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;" id="reactionsContainer">
+                        {# Bouton Like #}
+                        <button id="likeBtn"
+                                type="button"
+                                data-article-id="{{ article.id }}"
+                                style="padding: 0.75rem 1.5rem; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s; font-size: 1rem; {% if userReaction and userReaction.isLike %}background: #10b981; border: 2px solid #10b981; color: white;{% else %}background: white; border: 2px solid #e5e7eb; color: #374151;{% endif %}">
                             👍 J'aime
-                            <span style="
-                                margin-left: 0.5rem;
-                                padding: 0.25rem 0.5rem;
-                                border-radius: 4px;
-                                background: rgba(0,0,0,0.1);
-                                font-size: 0.9rem;
-                            ">
+                            <span id="likesCount" style="margin-left: 0.5rem; padding: 0.25rem 0.5rem; border-radius: 4px; background: rgba(0,0,0,0.1); font-size: 0.9rem;">
                                 {{ likesCount }}
                             </span>
                         </button>
-                    </form>
 
-                    {# 👎 Bouton Dislike #}
-                    <form method="POST"
-                          action="{{ path('app_reaction_article_dislike', { articleId: article.id }) }}"
-                          style="display: inline;">
-                        <button type="submit"
-                                style="
-                                    padding: 0.75rem 1.5rem;
-                                    border-radius: 8px;
-                                    cursor: pointer;
-                                    font-weight: 600;
-                                    transition: all 0.3s;
-                                    font-size: 1rem;
-                                    {% if userReaction and not userReaction.isLike %}
-                                        background: #ef4444;
-                                        border: 2px solid #ef4444;
-                                        color: white;
-                                    {% else %}
-                                        background: white;
-                                        border: 2px solid #e5e7eb;
-                                        color: #374151;
-                                    {% endif %}
-                                ">
+                        {# Bouton Dislike #}
+                        <button id="dislikeBtn"
+                                type="button"
+                                data-article-id="{{ article.id }}"
+                                style="padding: 0.75rem 1.5rem; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s; font-size: 1rem; {% if userReaction and not userReaction.isLike %}background: #ef4444; border: 2px solid #ef4444; color: white;{% else %}background: white; border: 2px solid #e5e7eb; color: #374151;{% endif %}"
+                                id="dislikeBtnElement">
                             👎 Je n'aime pas
-                            <span style="
-                                margin-left: 0.5rem;
-                                padding: 0.25rem 0.5rem;
-                                border-radius: 4px;
-                                background: rgba(0,0,0,0.1);
-                                font-size: 0.9rem;
-                            ">
+                            <span id="dislikesCount" style="margin-left: 0.5rem; padding: 0.25rem 0.5rem; border-radius: 4px; background: rgba(0,0,0,0.1); font-size: 0.9rem;">
                                 {{ dislikesCount }}
                             </span>
                         </button>
+                    </div>
+                {% else %}
+                    <p style="background: #FFE5DC; padding: 1rem; border-radius: 8px; border-left: 4px solid #FF6B35; color: #111827; margin-bottom: 1rem;">
+                        👤 <a href="{{ path('app_login') }}" style="color: #FF6B35; font-weight: 600; text-decoration: none;">Connectez-vous</a> pour réagir
+                    </p>
+                    <p style="margin: 0; color: #6b5563; font-size: 0.95rem;">
+                        👍 <strong>{{ likesCount }}</strong> likes · 👎 <strong>{{ dislikesCount }}</strong> dislikes
+                    </p>
+                {% endif %}
+            </div>
+
+            {# Section Commentaires #}
+            <div>
+                <h3 style="font-size: 1.25rem; font-weight: 700; color: #111827; margin: 0 0 1.5rem 0;">
+                    💬 Commentaires ({{ article.comments|length }})
+                </h3>
+                
+                {# Formulaire d'ajout de commentaire #}
+                {% if is_granted('ROLE_USER') %}
+                    <form id="commentForm" style="margin-bottom: 2rem;">
+                        <textarea id="commentContent"
+                                  style="width: 100%; padding: 1rem; border: 2px solid #e5e7eb; border-radius: 8px; min-height: 120px; margin-bottom: 1rem; font-family: inherit; font-size: 1rem; box-sizing: border-box;" 
+                                  placeholder="Votre commentaire..." 
+                                  required></textarea>
+                        <button type="submit" 
+                                id="submitCommentBtn"
+                                style="padding: 0.75rem 1.5rem; background: linear-gradient(135deg, #FF6B35, #E85A2A); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; transition: all 0.3s;">
+                            Publier
+                        </button>
                     </form>
-                </div>
-            {% else %}
-                <p style="background: #FFE5DC; padding: 1rem; border-radius: 8px; border-left: 4px solid #FF6B35; color: #111827;">
-                    👤 <a href="{{ path('app_login') }}" style="color: #FF6B35; font-weight: 600; text-decoration: none;">Connectez-vous</a> pour réagir
-                </p>
-                <p style="margin-top: 1rem; color: #6b5563; font-size: 0.95rem;">
-                    👍 <strong>{{ likesCount }}</strong> likes · 👎 <strong>{{ dislikesCount }}</strong> dislikes
-                </p>
-            {% endif %}
-        </div>
+                {% endif %}
 
-        {# ============= SECTION COMMENTAIRES ============= #}
-        <div style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
-            <h3 style="font-size: 1.25rem; font-weight: 700; color: #111827; margin-bottom: 1.5rem;">💬 Commentaires ({{ article.comments|length }})</h3>
-            
-            {% if is_granted('ROLE_USER') %}
-                <form method="POST" action="{{ path('app_comment_add', {id: article.id}) }}" style="margin-bottom: 2rem;">
-                    <textarea name="content" style="width: 100%; padding: 1rem; border: 2px solid #e5e7eb; border-radius: 8px; min-height: 120px; margin-bottom: 1rem; font-family: inherit; font-size: 1rem;" placeholder="Votre commentaire..." required></textarea>
-                    <button type="submit" style="padding: 0.75rem 1.5rem; background: linear-gradient(135deg, #FF6B35, #E85A2A); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; transition: all 0.3s;">Publier</button>
-                </form>
-            {% endif %}
-
-            {% if article.comments|length > 0 %}
-                <div style="display: flex; flex-direction: column; gap: 1rem;">
-                {% for comment in article.comments %}
-                    {% if comment.status == 'approved' %}
-                        <div style="background: #f9fafb; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #FF6B35;">
-                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
-                                <div>
-                                    <strong style="color: #111827; display: block; margin-bottom: 0.5rem; font-size: 1rem;">{{ comment.author.name }}</strong>
-                                    <small style="color: #6b5563; display: block; margin-bottom: 1rem; font-size: 0.85rem;">{{ comment.createdAt|date('d M Y H:i') }}</small>
+                {# Liste des commentaires #}
+                <div id="commentsList" style="display: flex; flex-direction: column; gap: 1rem;">
+                {% if article.comments|length > 0 %}
+                    {% for comment in article.comments %}
+                        {% if comment.status == 'approved' %}
+                            <div class="comment-item" data-comment-id="{{ comment.id }}" style="background: #f9fafb; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #FF6B35;">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                                    <div>
+                                        <strong style="color: #111827; display: block; margin-bottom: 0.5rem; font-size: 1rem;">
+                                            {{ comment.author.name }}
+                                        </strong>
+                                        <small style="color: #6b5563; display: block; margin-bottom: 1rem; font-size: 0.85rem;">
+                                            {{ comment.createdAt|date('d M Y H:i') }}
+                                        </small>
+                                    </div>
+                                    {% if is_granted('ROLE_USER') and comment.author != app.user %}
+                                        <button type="button" 
+                                                class="btn-report-comment" 
+                                                data-comment-id="{{ comment.id }}" 
+                                                style="padding: 0.4rem 0.8rem; background: #f97316; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.8rem; white-space: nowrap;">
+                                            🚩 Signaler
+                                        </button>
+                                    {% endif %}
                                 </div>
-                                {% if is_granted('ROLE_USER') and comment.author != app.user %}
-                                    <button type="button" class="btn-report-comment" data-comment-id="{{ comment.id }}" style="padding: 0.4rem 0.8rem; background: #f97316; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.8rem; white-space: nowrap;">🚩 Signaler</button>
-                                {% endif %}
+                                <p style="color: #374151; line-height: 1.6; margin: 0;">{{ comment.content|nl2br }}</p>
                             </div>
-                            <p style="color: #374151; line-height: 1.6; margin: 0;">{{ comment.content|nl2br }}</p>
-                        </div>
-                    {% endif %}
-                {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <p id="noCommentsMsg" style="text-align: center; color: #6b5563; padding: 2rem; margin: 0;">Aucun commentaire. Soyez le premier !</p>
+                {% endif %}
                 </div>
-            {% else %}
-                <p style="text-align: center; color: #6b5563; padding: 2rem;">Aucun commentaire. Soyez le premier !</p>
-            {% endif %}
+            </div>
+
         </div>
+        {# FIN du conteneur principal de l'article #}
     </div>
 </div>
 
@@ -194,7 +215,10 @@
         <form id="reportForm" style="display: flex; flex-direction: column; gap: 1rem;">
             <div>
                 <label for="reportReason" style="display: block; font-weight: 600; color: #111827; margin-bottom: 0.5rem;">Raison du signalement *</label>
-                <select id="reportReason" name="reason" style="width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 1rem;" required>
+                <select id="reportReason" 
+                        name="reason" 
+                        style="width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 1rem;" 
+                        required>
                     <option value="">Sélectionnez une raison</option>
                     <option value="spam">Spam</option>
                     <option value="inappropriate">Contenu inapproprié</option>
@@ -207,132 +231,334 @@
             
             <div>
                 <label for="reportDescription" style="display: block; font-weight: 600; color: #111827; margin-bottom: 0.5rem;">Description (optionnel)</label>
-                <textarea id="reportDescription" name="description" style="width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 1rem; min-height: 100px;" placeholder="Expliquez pourquoi vous signalez ce contenu..."></textarea>
+                <textarea id="reportDescription" 
+                          name="description" 
+                          style="width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 1rem; min-height: 100px;" 
+                          placeholder="Expliquez pourquoi vous signalez ce contenu..."></textarea>
             </div>
             
             <div style="display: flex; gap: 1rem;">
-                <button type="button" onclick="closeReportModal()" style="flex: 1; padding: 0.75rem 1.5rem; background: #e5e7eb; color: #374151; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Annuler</button>
-                <button type="submit" style="flex: 1; padding: 0.75rem 1.5rem; background: #f97316; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Signaler</button>
+                <button type="button" 
+                        onclick="closeReportModal()" 
+                        style="flex: 1; padding: 0.75rem 1.5rem; background: #e5e7eb; color: #374151; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                    Annuler
+                </button>
+                <button type="submit" 
+                        style="flex: 1; padding: 0.75rem 1.5rem; background: #f97316; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                    Signaler
+                </button>
             </div>
         </form>
     </div>
 </div>
 
-<script>
-    let reportType = null;
-    let reportId = null;
+{% endblock %}
 
-    // Bouton de signalement article
-    const reportBtn = document.getElementById('reportBtn');
-    if (reportBtn) {
-        reportBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            reportType = 'article';
-            reportId = {{ article.id }};
-            console.log('Article report button clicked:', reportType, reportId);
-            openReportModal();
-        });
-    }
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        const articleId = {{ article.id }};
+        let currentUserReaction = null;
 
-    // Utiliser la délégation d'événements pour les boutons de signalement commentaires
-    document.addEventListener('click', (e) => {
-        const reportBtn = e.target.closest('.btn-report-comment');
-        if (reportBtn) {
-            e.preventDefault();
-            e.stopPropagation();
-            reportType = 'comment';
-            reportId = reportBtn.getAttribute('data-comment-id');
-            console.log('Comment report button clicked:', reportType, reportId, 'Button:', reportBtn);
-            openReportModal();
+        // Initialize current user reaction state
+        {% if userReaction %}
+            currentUserReaction = {{ userReaction.isLike ? 'true' : 'false' }};
+        {% endif %}
+
+        // Handle like button
+        const likeBtn = document.getElementById('likeBtn');
+        if (likeBtn) {
+            likeBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                await handleReaction('like');
+            });
         }
-    });
 
-    function openReportModal() {
-        const modal = document.getElementById('reportModal');
-        if (modal) {
-            modal.style.display = 'flex';
-            console.log('Modal opened with reportType:', reportType, 'reportId:', reportId);
+        // Handle dislike button
+        const dislikeBtn = document.getElementById('dislikeBtn');
+        if (dislikeBtn) {
+            dislikeBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                await handleReaction('dislike');
+            });
         }
-    }
 
-    function closeReportModal() {
-        const modal = document.getElementById('reportModal');
-        if (modal) {
-            modal.style.display = 'none';
+        // Handle comment form submission
+        const commentForm = document.getElementById('commentForm');
+        if (commentForm) {
+            commentForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await submitComment();
+            });
         }
-        document.getElementById('reportForm').reset();
-    }
 
-    // Fermer le modal en cliquant en dehors
-    const reportModal = document.getElementById('reportModal');
-    if (reportModal) {
-        reportModal.addEventListener('click', (e) => {
-            if (e.target.id === 'reportModal') {
-                closeReportModal();
+        async function handleReaction(type) {
+            try {
+                const response = await fetch(`/reaction/api/article/${articleId}/${type}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    updateReactionUI(type, data);
+                } else {
+                    alert('❌ ' + (data.error || 'Erreur lors de la réaction'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Erreur lors de la réaction: ' + error.message);
             }
-        });
-    }
+        }
 
-    // Soumettre le signalement
-    const reportForm = document.getElementById('reportForm');
-    if (reportForm) {
-        reportForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
+        function updateReactionUI(type, data) {
+            const likesCountEl = document.getElementById('likesCount');
+            const dislikesCountEl = document.getElementById('dislikesCount');
+            const likeBtnEl = document.getElementById('likeBtn');
+            const dislikeBtnEl = document.getElementById('dislikeBtn');
 
-            const reason = document.getElementById('reportReason').value;
-            const description = document.getElementById('reportDescription').value;
+            // Update counts
+            if (likesCountEl) likesCountEl.textContent = data.likesCount;
+            if (dislikesCountEl) dislikesCountEl.textContent = data.dislikesCount;
 
-            console.log('Form submitted - reportType:', reportType, 'reportId:', reportId);
+            // Reset both buttons
+            likeBtnEl.style.background = 'white';
+            likeBtnEl.style.borderColor = '#e5e7eb';
+            likeBtnEl.style.color = '#374151';
 
-            if (!reason) {
-                alert('Veuillez sélectionner une raison');
-                return;
+            dislikeBtnEl.style.background = 'white';
+            dislikeBtnEl.style.borderColor = '#e5e7eb';
+            dislikeBtnEl.style.color = '#374151';
+
+            // Update active button based on action
+            if (data.action === 'added' || data.action === 'changed') {
+                if (type === 'like') {
+                    likeBtnEl.style.background = '#10b981';
+                    likeBtnEl.style.borderColor = '#10b981';
+                    likeBtnEl.style.color = 'white';
+                } else {
+                    dislikeBtnEl.style.background = '#ef4444';
+                    dislikeBtnEl.style.borderColor = '#ef4444';
+                    dislikeBtnEl.style.color = 'white';
+                }
             }
+        }
 
-            if (!reportType || !reportId) {
-                alert('Erreur: Type de signalement ou ID manquant');
-                console.error('Missing reportType or reportId:', reportType, reportId);
+        async function submitComment() {
+            const commentContent = document.getElementById('commentContent');
+            const content = commentContent.value.trim();
+
+            if (!content) {
+                alert('❌ Le commentaire ne peut pas être vide');
                 return;
             }
 
             try {
-                let endpoint;
-                if (reportType === 'article') {
-                    endpoint = `/api/reports/article/{{ article.id }}`;
-                } else if (reportType === 'comment') {
-                    endpoint = `/api/reports/comment/${reportId}`;
-                } else {
-                    throw new Error('Invalid report type: ' + reportType);
-                }
-
-                console.log('Sending report to:', endpoint);
-
-                const response = await fetch(endpoint, {
+                const response = await fetch(`/comments/api/create`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest'
                     },
                     body: JSON.stringify({
-                        reason: reason,
-                        description: description
+                        articleId: articleId,
+                        content: content
                     })
                 });
 
                 const data = await response.json();
 
-                if (response.ok) {
-                    alert('✅ Signalement envoyé avec succès. Merci de votre contribution !');
-                    closeReportModal();
+                if (response.ok && data.id) {
+                    // Add comment to UI
+                    addCommentToUI(content, data.id);
+                    commentContent.value = '';
+                    commentContent.focus();
                 } else {
-                    alert('❌ ' + (data.error || 'Erreur lors du signalement'));
+                    alert('❌ ' + (data.error || 'Erreur lors de l\'ajout du commentaire'));
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('❌ Erreur lors de l\'envoi du signalement: ' + error.message);
+                alert('❌ Erreur lors de l\'ajout du commentaire: ' + error.message);
+            }
+        }
+
+        function addCommentToUI(content, commentId) {
+            const commentsList = document.getElementById('commentsList');
+            const noCommentsMsg = document.getElementById('noCommentsMsg');
+
+            // Remove "no comments" message if it exists
+            if (noCommentsMsg) {
+                noCommentsMsg.remove();
+            }
+
+            // Create new comment element
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('fr-FR', { 
+                day: '2-digit', 
+                month: 'short', 
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            const commentHTML = `
+                <div class="comment-item" data-comment-id="${commentId}" style="background: #f9fafb; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #FF6B35; animation: slideIn 0.3s ease-out;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                        <div>
+                            <strong style="color: #111827; display: block; margin-bottom: 0.5rem; font-size: 1rem;">
+                                {% if app.user %}{{ app.user.name }}{% else %}Anonymous{% endif %}
+                            </strong>
+                            <small style="color: #6b5563; display: block; margin-bottom: 1rem; font-size: 0.85rem;">
+                                ${dateStr}
+                            </small>
+                        </div>
+                    </div>
+                    <p style="color: #374151; line-height: 1.6; margin: 0;">${escapeHtml(content)}</p>
+                </div>
+            `;
+
+            commentsList.insertAdjacentHTML('afterbegin', commentHTML);
+
+            // Add animation style if not already present
+            if (!document.querySelector('style[data-animation]')) {
+                const style = document.createElement('style');
+                style.setAttribute('data-animation', 'true');
+                style.textContent = `
+                    @keyframes slideIn {
+                        from {
+                            opacity: 0;
+                            transform: translateY(-20px);
+                        }
+                        to {
+                            opacity: 1;
+                            transform: translateY(0);
+                        }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Report functionality
+        let reportType = null;
+        let reportId = null;
+
+        const reportBtn = document.getElementById('reportBtn');
+        if (reportBtn) {
+            reportBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                reportType = 'article';
+                reportId = {{ article.id }};
+                console.log('Article report button clicked:', reportType, reportId);
+                openReportModal();
+            });
+        }
+
+        document.addEventListener('click', (e) => {
+            const reportBtn = e.target.closest('.btn-report-comment');
+            if (reportBtn) {
+                e.preventDefault();
+                e.stopPropagation();
+                reportType = 'comment';
+                reportId = reportBtn.getAttribute('data-comment-id');
+                console.log('Comment report button clicked:', reportType, reportId, 'Button:', reportBtn);
+                openReportModal();
             }
         });
-    }
-</script>
 
+        function openReportModal() {
+            const modal = document.getElementById('reportModal');
+            if (modal) {
+                modal.style.display = 'flex';
+                console.log('Modal opened with reportType:', reportType, 'reportId:', reportId);
+            }
+        }
+
+        function closeReportModal() {
+            const modal = document.getElementById('reportModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+            document.getElementById('reportForm').reset();
+        }
+
+        const reportModal = document.getElementById('reportModal');
+        if (reportModal) {
+            reportModal.addEventListener('click', (e) => {
+                if (e.target.id === 'reportModal') {
+                    closeReportModal();
+                }
+            });
+        }
+
+        const reportForm = document.getElementById('reportForm');
+        if (reportForm) {
+            reportForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const reason = document.getElementById('reportReason').value;
+                const description = document.getElementById('reportDescription').value;
+
+                console.log('Form submitted - reportType:', reportType, 'reportId:', reportId);
+
+                if (!reason) {
+                    alert('Veuillez sélectionner une raison');
+                    return;
+                }
+
+                if (!reportType || !reportId) {
+                    alert('Erreur: Type de signalement ou ID manquant');
+                    console.error('Missing reportType or reportId:', reportType, reportId);
+                    return;
+                }
+
+                try {
+                    let endpoint;
+                    if (reportType === 'article') {
+                        endpoint = `/api/reports/article/{{ article.id }}`;
+                    } else if (reportType === 'comment') {
+                        endpoint = `/api/reports/comment/${reportId}`;
+                    } else {
+                        throw new Error('Invalid report type: ' + reportType);
+                    }
+
+                    console.log('Sending report to:', endpoint);
+
+                    const response = await fetch(endpoint, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify({
+                            reason: reason,
+                            description: description
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        alert('✅ Signalement envoyé avec succès. Merci de votre contribution !');
+                        closeReportModal();
+                    } else {
+                        alert('❌ ' + (data.error || 'Erreur lors du signalement'));
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('❌ Erreur lors de l\'envoi du signalement: ' + error.message);
+                }
+            });
+        }
+    </script>
 {% endblock %}

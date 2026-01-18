@@ -1,0 +1,204 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Conditions d'utilisation - BlogSphere{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .terms-container {
+        max-width: 900px;
+        margin: 3rem auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .terms-container h1 {
+        color: var(--color-primary);
+        margin-bottom: 0.5rem;
+        font-size: 2.5rem;
+    }
+
+    .terms-container .last-updated {
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 2rem;
+        font-style: italic;
+    }
+
+    .terms-container h2 {
+        color: var(--color-accent);
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+        font-size: 1.5rem;
+        border-bottom: 2px solid var(--color-accent);
+        padding-bottom: 0.5rem;
+    }
+
+    .terms-container h3 {
+        color: var(--color-primary);
+        margin-top: 1.5rem;
+        margin-bottom: 0.75rem;
+        font-size: 1.1rem;
+    }
+
+    .terms-container p {
+        color: #333;
+        line-height: 1.8;
+        margin-bottom: 1rem;
+    }
+
+    .terms-container ul, 
+    .terms-container ol {
+        color: #333;
+        margin-left: 2rem;
+        margin-bottom: 1rem;
+        line-height: 1.8;
+    }
+
+    .terms-container li {
+        margin-bottom: 0.5rem;
+    }
+
+    .terms-container a {
+        color: var(--color-accent);
+        text-decoration: none;
+    }
+
+    .terms-container a:hover {
+        text-decoration: underline;
+    }
+
+    .terms-container strong {
+        color: var(--color-primary);
+    }
+
+    .back-link {
+        display: inline-block;
+        margin-top: 2rem;
+        padding: 0.75rem 1.5rem;
+        background: var(--color-accent);
+        color: white;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .back-link:hover {
+        background: #ff9800;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(240, 187, 120, 0.3);
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="terms-container">
+    <h1>Conditions d'utilisation</h1>
+    <p class="last-updated">Dernière mise à jour : 12 janvier 2026</p>
+
+    <h2>1. Acceptation des conditions</h2>
+    <p>En accédant à BlogSphere et en créant un compte, vous acceptez pleinement et sans réserve ces conditions d'utilisation. Si vous n'acceptez pas ces conditions, vous ne devez pas utiliser ce site.</p>
+
+    <h2>2. Définitions</h2>
+    <h3>BlogSphere</h3>
+    <p>Désigne le site web et l'application accessible à l'adresse www.blogsphere.com ainsi que tous ses services associés.</p>
+    
+    <h3>Utilisateur</h3>
+    <p>Toute personne qui crée un compte ou utilise BlogSphere, y compris les rédacteurs, superviseurs et administrateurs.</p>
+    
+    <h3>Contenu</h3>
+    <p>Les articles, commentaires, images et toute autre matière que vous publiez sur BlogSphere.</p>
+
+    <h2>3. Inscription et compte</h2>
+    <h3>Conditions d'inscription</h3>
+    <ul>
+        <li>Vous devez être âgé(e) d'au moins 13 ans</li>
+        <li>Vous devez fournir des informations exactes et à jour</li>
+        <li>Vous êtes responsable de la confidentialité de vos identifiants</li>
+        <li>Vous acceptez de ne pas créer plusieurs comptes</li>
+    </ul>
+
+    <h3>Types d'utilisateurs</h3>
+    <ul>
+        <li><strong>Rédacteur :</strong> Peut créer et publier des articles. Le premier article doit être approuvé par un superviseur</li>
+        <li><strong>Superviseur :</strong> Valide les articles des rédacteurs et modère le contenu</li>
+        <li><strong>Administrateur :</strong> Gère le site, les utilisateurs et l'ensemble de la plateforme</li>
+    </ul>
+
+    <h2>4. Contenu utilisateur</h2>
+    <h3>Responsabilité du contenu</h3>
+    <p>Vous êtes entièrement responsable de tout contenu que vous publiez sur BlogSphere. Vous garantissez que :</p>
+    <ul>
+        <li>Vous possédez ou avez le droit de publier ce contenu</li>
+        <li>Le contenu n'infringe pas les droits d'auteur ou de propriété intellectuelle</li>
+        <li>Le contenu n'est pas illégal, diffamatoire, ou offensant</li>
+        <li>Le contenu n'est pas du spam ou ne contient pas de logiciels malveillants</li>
+    </ul>
+
+    <h3>Modération du contenu</h3>
+    <p>BlogSphere se réserve le droit de :</p>
+    <ul>
+        <li>Modérer, éditer ou supprimer tout contenu en violation de ces conditions</li>
+        <li>Suspendre ou supprimer des comptes d'utilisateurs</li>
+        <li>Signaler du contenu illégal aux autorités compétentes</li>
+    </ul>
+
+    <h2>5. Droits d'auteur</h2>
+    <p>En publiant un article sur BlogSphere, vous accordez à BlogSphere une licence non-exclusive, mondiale et perpétuelle pour utiliser, reproduire, afficher et distribuer votre contenu sur la plateforme.</p>
+    <p>Vous conservez la propriété de votre contenu et pouvez le retirer à tout moment.</p>
+
+    <h2>6. Comportement utilisateur</h2>
+    <h3>Comportements interdits</h3>
+    <p>Vous acceptez de ne pas :</p>
+    <ul>
+        <li>Harceler, menacer ou intimider d'autres utilisateurs</li>
+        <li>Publier du contenu violent, haineux ou discriminatoire</li>
+        <li>Tenter de contourner les mesures de sécurité</li>
+        <li>Utiliser des bots ou automatiser l'accès sans permission</li>
+        <li>Collecter ou extirper des données du site</li>
+        <li>Publier du contenu sexuel ou réservé aux adultes</li>
+        <li>Spammer ou promouvoir à titre professionnel sans autorisation</li>
+    </ul>
+
+    <h2>7. Signalement et modération</h2>
+    <h3>Signaler du contenu problématique</h3>
+    <p>Si vous découvrez du contenu violant ces conditions, vous pouvez le signaler directement sur BlogSphere. Notre équipe examinera rapidement chaque rapport.</p>
+
+    <h3>Conséquences des violations</h3>
+    <p>Les violations peuvent entraîner :</p>
+    <ul>
+        <li>L'avertissement</li>
+        <li>La suppression de contenu</li>
+        <li>La suspension temporaire du compte</li>
+        <li>La suppression permanente du compte</li>
+        <li>Une signalation aux autorités (pour contenus illégaux)</li>
+    </ul>
+
+    <h2>8. Limitation de responsabilité</h2>
+    <p>BlogSphere est fourni "tel quel" sans garantie d'aucune sorte. Dans la limite autorisée par la loi, BlogSphere ne peut être tenu responsable de :</p>
+    <ul>
+        <li>Les dommages directs ou indirects</li>
+        <li>Les pertes de données ou de revenus</li>
+        <li>Les interruptions de service</li>
+        <li>Le contenu publié par d'autres utilisateurs</li>
+    </ul>
+
+    <h2>9. Protection des données personnelles</h2>
+    <p>Votre utilisation de BlogSphere est soumise à notre <a href="{{ path('app_about') }}">politique de confidentialité</a>. En créant un compte, vous consentez au traitement de vos données personnelles conformément à cette politique et à la réglementation applicable (RGPD, CCPA, etc.).</p>
+
+    <h2>10. Modification des conditions</h2>
+    <p>BlogSphere se réserve le droit de modifier ces conditions à tout moment. Les modifications seront communiquées par email ou par avis sur le site. La continuation de votre utilisation du site après les modifications signifie votre acceptation des nouvelles conditions.</p>
+
+    <h2>11. Résiliation</h2>
+    <p>Vous pouvez supprimer votre compte à tout moment via vos paramètres de profil. BlogSphere peut aussi résilier votre compte en cas de violation de ces conditions.</p>
+
+    <h2>12. Litiges et juridiction</h2>
+    <p>Ces conditions sont régies par la loi française. Tout litige sera résolu par les tribunaux compétents en France.</p>
+
+    <h2>13. Contact</h2>
+    <p>Pour toute question concernant ces conditions d'utilisation, veuillez nous <a href="{{ path('app_contact_support') }}">contacter</a>.</p>
+
+    <a href="javascript:history.back()" class="back-link">← Retour</a>
+</div>
+{% endblock %}

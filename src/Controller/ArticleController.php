@@ -4,10 +4,12 @@ namespace App\Controller;
 
 use App\Entity\Article;
 use App\Entity\Category;
+use App\Entity\Tag;
 use App\Form\ArticleType;
 use App\Repository\ArticleRepository;
 use App\Repository\CategoryRepository;
 use App\Repository\ReactionRepository;
+use App\Repository\TagRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -71,7 +73,7 @@ class ArticleController extends AbstractController
 
     #[Route('/new', name: '_new', methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_USER')]
-    public function new(Request $request, EntityManagerInterface $em, ArticleRepository $articleRepository): Response
+    public function new(Request $request, EntityManagerInterface $em, ArticleRepository $articleRepository, TagRepository $tagRepository): Response
     {
         $user = $this->getUser();
         
@@ -115,7 +117,14 @@ class ArticleController extends AbstractController
                 $article->setImage($newFilename);
             }
 
+            // Process tags from comma-separated string
+            $tagsString = $form->get('tags')->getData();
+            if ($tagsString) {
+                $this->processTags($article, $tagsString, $tagRepository, $em);
+            }
+
             $article->setAuthor($user);
+            $article->setAuthorName($user->getName());
             $article->setCreatedAt(new \DateTime());
 
             // Vérifier si c'est le premier article APPROUVÉ de l'utilisateur
@@ -180,13 +189,22 @@ class ArticleController extends AbstractController
 
     #[Route('/{id}/edit', name: '_edit', methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_USER')]
-    public function edit(Request $request, Article $article, EntityManagerInterface $em): Response
+    public function edit(Request $request, Article $article, EntityManagerInterface $em, TagRepository $tagRepository): Response
     {
         if ($article->getAuthor() !== $this->getUser() && !$this->isGranted('ROLE_ADMIN')) {
             throw $this->createAccessDeniedException('Vous ne pouvez modifier que vos propres articles.');
         }
 
         $form = $this->createForm(ArticleType::class, $article);
+        
+        // Préremplir les tags existants en chaîne séparée par des virgules
+        if ($article->getTags()->count() > 0) {
+            $tagsString = implode(', ', $article->getTags()->map(function($tag) {
+                return $tag->getName();
+            })->toArray());
+            $form->get('tags')->setData($tagsString);
+        }
+        
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -200,6 +218,15 @@ class ArticleController extends AbstractController
                     $newFilename
                 );
                 $article->setImage($newFilename);
+            }
+
+            // Process tags from comma-separated string
+            $tagsString = $form->get('tags')->getData();
+            if ($tagsString !== null) {
+                // Clear existing tags
+                $article->getTags()->clear();
+                // Add new tags
+                $this->processTags($article, $tagsString, $tagRepository, $em);
             }
 
             $article->setUpdatedAt(new \DateTime());
@@ -232,5 +259,37 @@ class ArticleController extends AbstractController
         }
 
         return $this->redirectToRoute('app_article_index');
+    }
+
+    /**
+     * Process comma-separated tags string and attach to article
+     */
+    private function processTags(Article $article, string $tagsString, TagRepository $tagRepository, EntityManagerInterface $em): void
+    {
+        if (empty($tagsString)) {
+            return;
+        }
+
+        // Split by comma and clean up
+        $tagNames = array_map('trim', explode(',', $tagsString));
+        $tagNames = array_filter($tagNames); // Remove empty strings
+
+        foreach ($tagNames as $tagName) {
+            // Look for existing tag (case-insensitive)
+            $tag = $tagRepository->findOneBy(['name' => $tagName]);
+
+            if (!$tag) {
+                // Create new tag
+                $tag = new Tag();
+                $tag->setName($tagName);
+                $tag->setSlug(strtolower(str_replace(' ', '-', $tagName)));
+                $em->persist($tag);
+            }
+
+            // Add tag to article if not already present
+            if (!$article->getTags()->contains($tag)) {
+                $article->addTag($tag);
+            }
+        }
     }
 }

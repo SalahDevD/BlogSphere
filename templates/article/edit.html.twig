@@ -2,19 +2,31 @@
 
 {% block title %}Modifier l'article{% endblock %}
 
+{% block stylesheets %}
+<link rel="stylesheet" href="{{ asset('css/article.css') }}">
+{% endblock %}
+
 {% block body %}
 <div style="max-width: 800px; margin: 3rem auto; padding: 2rem; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
     <h1 style="font-size: 2rem; font-weight: 900; color: #111827; margin-bottom: 2rem;">✏️ Modifier l'article</h1>
 
-    {{ form_start(form) }}
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div style="padding: 1rem; background: {% if label == 'success' %}#e8f5e9{% else %}#ffebee{% endif %}; border-left: 4px solid {% if label == 'success' %}#388e3c{% else %}#d32f2f{% endif %}; border-radius: 4px; margin-bottom: 1rem; color: {% if label == 'success' %}#2e7d32{% else %}#c62828{% endif %};">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'id': 'articleForm'}}) }}
         <div style="margin-bottom: 1.5rem;">
             {{ form_label(form.title, 'Titre', {'label_attr': {'style': 'display: block; font-weight: 600; color: #374151; margin-bottom: 0.5rem;'}}) }}
-            {{ form_widget(form.title, {'attr': {'style': 'width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px;'}}) }}
+            {{ form_widget(form.title, {'attr': {'style': 'width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem;', 'placeholder': 'Titre...'}}) }}
         </div>
 
         <div style="margin-bottom: 1.5rem;">
             {{ form_label(form.content, 'Contenu', {'label_attr': {'style': 'display: block; font-weight: 600; color: #374151; margin-bottom: 0.5rem;'}}) }}
-            {{ form_widget(form.content, {'attr': {'style': 'width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px; min-height: 250px;'}}) }}
+            {{ form_widget(form.content, {'attr': {'style': 'width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px; min-height: 250px; font-size: 1rem; font-family: inherit;', 'placeholder': 'Contenu...'}}) }}
         </div>
 
         <div style="margin-bottom: 1.5rem;">
@@ -22,9 +34,183 @@
             {{ form_widget(form.category, {'attr': {'style': 'width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px;'}}) }}
         </div>
 
-        <button type="submit" style="width: 100%; padding: 0.75rem; background: linear-gradient(135deg, #FF6B35, #E85A2A); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; margin-bottom: 1rem;">💾 Enregistrer</button>
+        {# Champ Tags en texte simple #}
+        <div style="margin-bottom: 1.5rem;">
+            {{ form_label(form.tags, '🏷️ Tags', {'label_attr': {'style': 'display: block; font-weight: 600; color: #374151; margin-bottom: 0.5rem;'}}) }}
+            {{ form_widget(form.tags, {'attr': {'style': 'width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem;', 'placeholder': 'football, can2025, maroc'}}) }}
+            {{ form_errors(form.tags) }}
+            <small style="display: block; margin-top: 0.5rem; color: #6b7280; font-size: 0.875rem;">
+                💡 Tapez les tags séparés par des virgules (ex: football, can2025, maroc)
+            </small>
+        </div>
+
+        {# Champ Image avec prévisualisation #}
+        <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 0.5rem;">📷 Image de l'article</label>
+            
+            {# Widget Symfony caché - le vrai input qui sera envoyé au serveur #}
+            {{ form_widget(form.imageFile, {
+                'attr': {
+                    'accept': 'image/png,image/jpeg,image/jpg',
+                    'style': 'display: none;'
+                }
+            }) }}
+            {{ form_errors(form.imageFile) }}
+            
+            {# Afficher l'image actuelle si elle existe #}
+            {% if article.image %}
+                <div id="currentImageContainer" style="margin-bottom: 1rem;">
+                    <p style="color: #6b7280; font-size: 0.875rem; margin-bottom: 0.5rem;">Image actuelle :</p>
+                    <img src="{{ asset('uploads/articles/' ~ article.image) }}" 
+                         alt="Image actuelle" 
+                         style="width: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; border: 2px solid #e5e7eb;">
+                </div>
+            {% endif %}
+            
+            {# Zone de prévisualisation pour la nouvelle image #}
+            <div id="imagePreviewContainer" style="display: none; margin-bottom: 1rem; position: relative;">
+                <p style="color: #6b7280; font-size: 0.875rem; margin-bottom: 0.5rem;">Nouvelle image :</p>
+                <img id="imagePreview" 
+                     src="" 
+                     alt="Aperçu" 
+                     style="width: 100%; max-height: 400px; object-fit: cover; border-radius: 8px; border: 2px solid #e5e7eb;">
+                <button type="button" 
+                        id="removeImage" 
+                        style="position: absolute; top: 30px; right: 10px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; font-weight: bold; font-size: 18px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); line-height: 1;">
+                    ✕
+                </button>
+            </div>
+
+            {# Zone de chargement - cliquable pour ouvrir le file picker #}
+            <div id="uploadLabel"
+                 style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; min-height: 150px; padding: 2rem; border: 2px dashed #e5e7eb; border-radius: 8px; cursor: pointer; transition: all 0.3s; background: #f9fafb;">
+                <svg style="width: 48px; height: 48px; color: #9ca3af; margin-bottom: 0.5rem; pointer-events: none;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                </svg>
+                <span style="color: #374151; font-weight: 600; margin-bottom: 0.25rem; pointer-events: none;">
+                    {% if article.image %}Cliquez pour changer l'image{% else %}Cliquez pour ajouter une image{% endif %}
+                </span>
+                <span style="color: #6b7280; font-size: 0.875rem; pointer-events: none;">PNG, JPG, JPEG jusqu'à 5MB</span>
+            </div>
+        </div>
+
+        <button type="submit" style="width: 100%; padding: 0.75rem; background: linear-gradient(135deg, #667eea, #5568d3); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 1rem; transition: all 0.3s; margin-bottom: 1rem;">💾 Enregistrer les modifications</button>
+        
+        {# Afficher les champs restants #}
+        {{ form_rest(form) }}
     {{ form_end(form) }}
 
     <a href="{{ path('app_article_show', {id: article.id}) }}" style="display: inline-block; padding: 0.5rem 1rem; background: #e5e7eb; color: #374151; text-decoration: none; border-radius: 8px; font-weight: 600;">← Annuler</a>
 </div>
+
+<style>
+    #uploadLabel:hover {
+        border-color: #FF6B35;
+        background: #FFF3E0;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Trouver l'input file Symfony qui gère imageFile
+        let imageUpload = null;
+        
+        // Chercher par attribut name contenant 'imageFile'
+        const fileInputs = document.querySelectorAll('input[type="file"]');
+        for (let input of fileInputs) {
+            if (input.name.includes('imageFile')) {
+                imageUpload = input;
+                break;
+            }
+        }
+        
+        const uploadLabel = document.getElementById('uploadLabel');
+        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+        const imagePreview = document.getElementById('imagePreview');
+        const removeImage = document.getElementById('removeImage');
+        const currentImageContainer = document.getElementById('currentImageContainer');
+
+        if (!imageUpload) {
+            console.error('Image file input not found');
+            return;
+        }
+
+        console.log('✓ Image upload input found:', imageUpload.name);
+
+        // Click sur la zone pour ouvrir le file picker
+        if (uploadLabel) {
+            uploadLabel.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Upload label clicked, triggering file picker');
+                imageUpload.click();
+            });
+        }
+
+        // Quand un fichier est sélectionné
+        imageUpload.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            
+            if (!file) {
+                console.log('No file selected');
+                return;
+            }
+            
+            console.log('✓ File selected:', {
+                name: file.name,
+                size: (file.size / 1024 / 1024).toFixed(2) + ' MB',
+                type: file.type
+            });
+            
+            // Vérifier la taille du fichier (5MB max)
+            const maxSize = 5 * 1024 * 1024;
+            if (file.size > maxSize) {
+                alert('⚠️ L\'image est trop volumineuse. Taille maximale : 5MB');
+                imageUpload.value = '';
+                return;
+            }
+
+            // Vérifier le type de fichier
+            const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+            if (!allowedTypes.includes(file.type)) {
+                alert('⚠️ Format non supporté. Utilisez PNG, JPG ou JPEG');
+                imageUpload.value = '';
+                return;
+            }
+
+            // Afficher l'aperçu
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                console.log('✓ Preview displaying...');
+                imagePreview.src = event.target.result;
+                imagePreviewContainer.style.display = 'block';
+                uploadLabel.style.display = 'none';
+                if (currentImageContainer) {
+                    currentImageContainer.style.display = 'none';
+                }
+            };
+            reader.onerror = function() {
+                console.error('FileReader error');
+                alert('Erreur lors de la lecture du fichier');
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // Supprimer l'image et revenir à la zone de chargement
+        if (removeImage) {
+            removeImage.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Remove button clicked');
+                imageUpload.value = '';
+                imagePreview.src = '';
+                imagePreviewContainer.style.display = 'none';
+                uploadLabel.style.display = 'flex';
+                if (currentImageContainer) {
+                    currentImageContainer.style.display = 'block';
+                }
+            });
+        }
+    });
+</script>
 {% endblock %}

@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\User;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -100,6 +101,19 @@ class RegistrationType extends AbstractType
                         'message' => 'Le mot de passe doit contenir au moins une minuscule, une majuscule et un chiffre.'
                     ])
                 ]
+            ])
+            ->add('termsAccepted', CheckboxType::class, [
+                'label' => 'J\'accepte les conditions d\'utilisation',
+                'attr' => [
+                    'class' => 'form-check-input'
+                ],
+                'constraints' => [
+                    new Assert\IsTrue([
+                        'message' => 'Vous devez accepter les conditions d\'utilisation pour continuer.'
+                    ])
+                ],
+                'mapped' => true,
+                'required' => true
             ]);
     }
 

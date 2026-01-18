@@ -26,7 +26,7 @@ class Article
     private ?Category $category = null;
 
     #[ORM\ManyToOne(inversedBy: 'articles')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
     private ?User $author = null;
 
     #[ORM\Column(type: 'datetime')]
@@ -41,10 +41,16 @@ class Article
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $image = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $authorName = null;
+
+    #[ORM\ManyToMany(targetEntity: Tag::class, inversedBy: 'articles')]
+    private Collection $tags;
+
     #[ORM\OneToMany(mappedBy: 'article', targetEntity: Comment::class, orphanRemoval: true)]
     private Collection $comments;
 
-    #[ORM\OneToMany(mappedBy: 'article', targetEntity: Report::class)]
+    #[ORM\OneToMany(mappedBy: 'article', targetEntity: Report::class, cascade: ['remove'], orphanRemoval: true)]
     private Collection $reports;
 
     #[ORM\OneToMany(mappedBy: 'article', targetEntity: Reaction::class, orphanRemoval: true)]
@@ -55,6 +61,7 @@ class Article
         $this->comments = new ArrayCollection();
         $this->reports = new ArrayCollection();
         $this->reactions = new ArrayCollection();
+        $this->tags = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -242,6 +249,41 @@ class Article
             }
         }
 
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Tag>
+     */
+    public function getTags(): Collection
+    {
+        return $this->tags;
+    }
+
+    public function addTag(Tag $tag): self
+    {
+        if (!$this->tags->contains($tag)) {
+            $this->tags[] = $tag;
+        }
+
+        return $this;
+    }
+
+    public function removeTag(Tag $tag): self
+    {
+        $this->tags->removeElement($tag);
+
+        return $this;
+    }
+
+    public function getAuthorName(): ?string
+    {
+        return $this->authorName;
+    }
+
+    public function setAuthorName(?string $authorName): self
+    {
+        $this->authorName = $authorName;
         return $this;
     }
 }

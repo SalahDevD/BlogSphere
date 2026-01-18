@@ -29,6 +29,15 @@ class ArticleType extends AbstractType
                 'choice_label' => 'name',
                 'label' => 'Catégorie',
             ])
+            ->add('tags', TextType::class, [
+                'label' => 'Tags',
+                'mapped' => false,
+                'required' => false,
+                'attr' => [
+                    'placeholder' => 'football, can2025, maroc',
+                    'data-tags' => 'true',
+                ],
+            ])
             ->add('imageFile', FileType::class, [
                 'label' => 'Image (JPG ou PNG)',
                 'mapped' => false,     // important

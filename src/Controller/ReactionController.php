@@ -8,6 +8,7 @@ use App\Entity\CommentReaction;
 use App\Entity\Reaction;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -201,5 +202,133 @@ class ReactionController extends AbstractController
 
         $em->flush();
         return $this->redirectToRoute('app_article_show', ['id' => $comment->getArticle()->getId()]);
+    }
+
+    /**
+     * 👍 API: Liker un article (JSON)
+     */
+    #[Route('/api/article/{articleId}/like', name: 'api_article_like', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function apiLikeArticle(int $articleId, EntityManagerInterface $em): JsonResponse
+    {
+        $user = $this->getUser();
+        $article = $em->getRepository(Article::class)->find($articleId);
+
+        if (!$article) {
+            return $this->json(['error' => 'Article non trouvé'], 404);
+        }
+
+        if ($article->getValidationStatus() !== 'approved') {
+            return $this->json(['error' => 'Impossible de réagir à un article non publié'], 403);
+        }
+
+        $reactionRepo = $em->getRepository(Reaction::class);
+        $existingReaction = $reactionRepo->findOneBy([
+            'user'    => $user,
+            'article' => $article,
+        ]);
+
+        $action = null;
+
+        if ($existingReaction) {
+            if ($existingReaction->isLike()) {
+                $em->remove($existingReaction);
+                $action = 'removed';
+            } else {
+                $existingReaction->setIsLike(true);
+                $action = 'changed';
+            }
+        } else {
+            $reaction = new Reaction();
+            $reaction->setUser($user);
+            $reaction->setArticle($article);
+            $reaction->setIsLike(true);
+            $reaction->setCreatedAt(new \DateTime());
+            $em->persist($reaction);
+            $action = 'added';
+        }
+
+        $em->flush();
+
+        // Count reactions
+        $likesCount = $em->getRepository(Reaction::class)->count([
+            'article' => $article,
+            'isLike' => true,
+        ]);
+        $dislikesCount = $em->getRepository(Reaction::class)->count([
+            'article' => $article,
+            'isLike' => false,
+        ]);
+
+        return $this->json([
+            'success' => true,
+            'action' => $action,
+            'likesCount' => $likesCount,
+            'dislikesCount' => $dislikesCount,
+        ]);
+    }
+
+    /**
+     * 👎 API: Disliker un article (JSON)
+     */
+    #[Route('/api/article/{articleId}/dislike', name: 'api_article_dislike', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function apiDislikeArticle(int $articleId, EntityManagerInterface $em): JsonResponse
+    {
+        $user = $this->getUser();
+        $article = $em->getRepository(Article::class)->find($articleId);
+
+        if (!$article) {
+            return $this->json(['error' => 'Article non trouvé'], 404);
+        }
+
+        if ($article->getValidationStatus() !== 'approved') {
+            return $this->json(['error' => 'Impossible de réagir à un article non publié'], 403);
+        }
+
+        $reactionRepo = $em->getRepository(Reaction::class);
+        $existingReaction = $reactionRepo->findOneBy([
+            'user'    => $user,
+            'article' => $article,
+        ]);
+
+        $action = null;
+
+        if ($existingReaction) {
+            if (!$existingReaction->isLike()) {
+                $em->remove($existingReaction);
+                $action = 'removed';
+            } else {
+                $existingReaction->setIsLike(false);
+                $action = 'changed';
+            }
+        } else {
+            $reaction = new Reaction();
+            $reaction->setUser($user);
+            $reaction->setArticle($article);
+            $reaction->setIsLike(false);
+            $reaction->setCreatedAt(new \DateTime());
+            $em->persist($reaction);
+            $action = 'added';
+        }
+
+        $em->flush();
+
+        // Count reactions
+        $likesCount = $em->getRepository(Reaction::class)->count([
+            'article' => $article,
+            'isLike' => true,
+        ]);
+        $dislikesCount = $em->getRepository(Reaction::class)->count([
+            'article' => $article,
+            'isLike' => false,
+        ]);
+
+        return $this->json([
+            'success' => true,
+            'action' => $action,
+            'likesCount' => $likesCount,
+            'dislikesCount' => $dislikesCount,
+        ]);
     }
 }
